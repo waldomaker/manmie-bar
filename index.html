@@ -1,0 +1,524 @@
+<!DOCTYPE html>
+<html lang="ht">
+<head>
+<meta charset="UTF-8" />
+<meta name="viewport" content="width=device-width, initial-scale=1.0, viewport-fit=cover" />
+<title>Manmie Bar Restaurant</title>
+<meta name="description" content="Manje ayisyen otantik - Meni, Kòmand, Rezèvasyon, ak Galri" />
+<meta name="theme-color" content="#1a1209" />
+<meta name="mobile-web-app-capable" content="yes" />
+<meta name="apple-mobile-web-app-capable" content="yes" />
+<meta name="apple-mobile-web-app-status-bar-style" content="black-translucent" />
+<meta name="apple-mobile-web-app-title" content="Manmie Bar" />
+<link rel="manifest" href="manifest.json" />
+<link rel="icon" href="icons/icon-192.png" />
+<link rel="apple-touch-icon" href="icons/icon-192.png" />
+<link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/@tabler/icons-webfont@latest/dist/tabler-icons.min.css" />
+<style>
+  *{box-sizing:border-box;margin:0;padding:0;}
+  body{font-family:system-ui,-apple-system,sans-serif;background:#0e0a05;min-height:100vh;display:flex;justify-content:center;align-items:flex-start;padding:0;}
+  .app{width:100%;max-width:440px;margin:0 auto;background:#faf8f4;min-height:100vh;display:flex;flex-direction:column;position:relative;}
+
+  /* HEADER */
+  .hdr{background:#1a1209;padding:30px 20px 20px;text-align:center;}
+  .logo{width:68px;height:68px;border-radius:50%;border:2px solid #c9a84c;display:flex;align-items:center;justify-content:center;margin:0 auto 12px;}
+  .logo span{font-size:22px;color:#c9a84c;font-weight:600;letter-spacing:1px;}
+  .hdr h1{color:#c9a84c;font-size:18px;font-weight:600;letter-spacing:2.5px;}
+  .hdr .sub{color:#a08c6e;font-size:11px;margin-top:4px;letter-spacing:1.5px;}
+  .hdr .tag{color:#6b5b44;font-size:11px;margin-top:6px;font-style:italic;}
+
+  /* NAV */
+  .nav{display:flex;background:#120d06;border-bottom:1px solid #2a2015;position:sticky;top:0;z-index:100;}
+  .nb{flex:1;padding:11px 2px 8px;background:none;border:none;cursor:pointer;display:flex;flex-direction:column;align-items:center;gap:3px;color:#6b5b44;font-size:9px;letter-spacing:0.3px;transition:color 0.2s;font-family:inherit;}
+  .nb.active{color:#c9a84c;border-bottom:2px solid #c9a84c;}
+  .nb i{font-size:18px;}
+
+  /* SECTIONS */
+  .sec{display:none;flex:1;}
+  .sec.active{display:block;}
+
+  /* HOME */
+  .hero{background:#1a1209;padding:24px 20px;text-align:center;}
+  .hero-t{color:#f0e6d0;font-size:16px;font-weight:600;}
+  .hero-s{color:#a08c6e;font-size:13px;margin-top:7px;line-height:1.7;}
+  .hcard{margin:16px 16px 0;background:#fff;border:1px solid #e8e0d0;border-radius:12px;padding:14px 16px;}
+  .hcard h3{font-size:11px;letter-spacing:1.5px;color:#c9a84c;text-transform:uppercase;margin-bottom:10px;}
+  .hr{display:flex;justify-content:space-between;font-size:12px;color:#888;padding:4px 0;border-bottom:1px solid #f0ebe0;}
+  .hr:last-child{border-bottom:none;}
+  .hr span:last-child{color:#2c2c2a;font-weight:500;}
+  .fgrid{display:grid;grid-template-columns:1fr 1fr;gap:10px;padding:16px;}
+  .fc{background:#fff;border:1px solid #e8e0d0;border-radius:12px;padding:16px 10px;text-align:center;cursor:pointer;transition:border-color 0.2s;}
+  .fc:hover{border-color:#c9a84c;}
+  .fc i{font-size:24px;color:#c9a84c;}
+  .fc p{font-size:12px;color:#888;margin-top:6px;}
+
+  /* MENU */
+  .mhdr{padding:16px 16px 8px;background:#faf8f4;}
+  .mhdr h2{font-size:15px;font-weight:600;color:#2c2c2a;}
+  .cats{display:flex;gap:6px;padding:0 16px 12px;overflow-x:auto;background:#faf8f4;}
+  .cats::-webkit-scrollbar{display:none;}
+  .cp{padding:6px 14px;border-radius:20px;border:1px solid #d8d0c0;font-size:11px;background:none;cursor:pointer;white-space:nowrap;color:#888;font-family:inherit;transition:all 0.2s;}
+  .cp.active{background:#1a1209;color:#c9a84c;border-color:#c9a84c;}
+  .mitems{padding:0 16px 20px;display:flex;flex-direction:column;gap:10px;}
+  .mi{display:flex;align-items:center;background:#fff;border:1px solid #e8e0d0;border-radius:12px;padding:10px 12px;gap:10px;}
+  .mi-img{width:50px;height:50px;border-radius:10px;background:#f5f0e8;border:1px solid #e8e0d0;overflow:hidden;flex-shrink:0;display:flex;align-items:center;justify-content:center;}
+  .mi-img img{width:100%;height:100%;object-fit:cover;}
+  .mi-img i{font-size:22px;color:#c9a84c;opacity:0.5;}
+  .mi-body{flex:1;}
+  .mi-body h4{font-size:13px;font-weight:600;color:#2c2c2a;}
+  .mi-body p{font-size:11px;color:#888;margin-top:2px;}
+  .mi-right{text-align:right;flex-shrink:0;}
+  .iprice{font-size:13px;font-weight:600;color:#c9a84c;}
+  .abtn{margin-top:6px;padding:4px 10px;background:#1a1209;color:#c9a84c;border:1px solid #c9a84c;border-radius:8px;font-size:10px;cursor:pointer;font-family:inherit;transition:all 0.2s;}
+  .abtn:hover{background:#c9a84c;color:#1a1209;}
+
+  /* ORDER */
+  .osec{padding:16px 16px 24px;}
+  .osec h2{font-size:15px;font-weight:600;color:#2c2c2a;margin-bottom:14px;}
+  .olitems{display:flex;flex-direction:column;gap:8px;margin-bottom:14px;}
+  .oi{display:flex;justify-content:space-between;align-items:center;background:#fff;border:1px solid #e8e0d0;border-radius:12px;padding:11px 13px;}
+  .oi-left h4{font-size:13px;font-weight:600;color:#2c2c2a;}
+  .oi-left p{font-size:11px;color:#888;}
+  .oi-right{display:flex;align-items:center;gap:8px;}
+  .qty-btn{width:26px;height:26px;border-radius:50%;background:#faf8f4;border:1px solid #d8d0c0;cursor:pointer;font-size:16px;display:flex;align-items:center;justify-content:center;font-family:inherit;}
+  .qty-n{font-size:13px;font-weight:600;min-width:18px;text-align:center;}
+  .ototal{background:#fff;border:1px solid #e8e0d0;border-radius:12px;padding:11px 13px;display:flex;justify-content:space-between;margin-bottom:14px;}
+  .ototal span:first-child{font-size:13px;color:#888;}
+  .ototal span:last-child{font-size:15px;font-weight:600;color:#c9a84c;}
+  .mc-box{background:#1a1209;border-radius:12px;padding:16px;margin-bottom:14px;}
+  .mc-logo{display:flex;align-items:center;gap:8px;margin-bottom:12px;}
+  .mc-icon{width:32px;height:32px;border-radius:50%;background:#c9a84c;display:flex;align-items:center;justify-content:center;font-size:11px;font-weight:700;color:#1a1209;}
+  .mc-logo span{color:#f0e6d0;font-size:14px;font-weight:600;}
+  .mc-label{font-size:11px;color:#a08c6e;display:block;margin-bottom:4px;margin-top:10px;}
+  .mc-input{width:100%;background:#120d06;border:1px solid #3a2e1a;border-radius:8px;padding:9px 11px;color:#f0e6d0;font-size:13px;font-family:inherit;}
+  .mc-input:focus{outline:none;border-color:#c9a84c;}
+  .pay-btn{width:100%;padding:13px;background:#c9a84c;color:#1a1209;border:none;border-radius:12px;font-size:14px;font-weight:700;cursor:pointer;font-family:inherit;letter-spacing:0.5px;transition:opacity 0.2s;}
+  .pay-btn:hover{opacity:0.9;}
+  .empty-cart{text-align:center;padding:30px 0;color:#888;font-size:13px;}
+  .empty-cart i{font-size:36px;color:#d8d0c0;display:block;margin-bottom:10px;}
+
+  /* RESERVATION */
+  .rsec{padding:16px 16px 24px;}
+  .rsec h2{font-size:15px;font-weight:600;color:#2c2c2a;margin-bottom:16px;}
+  .fg{margin-bottom:12px;}
+  .fg label{font-size:11px;color:#888;display:block;margin-bottom:4px;letter-spacing:0.5px;}
+  .fg input,.fg select,.fg textarea{width:100%;padding:9px 11px;border:1px solid #d8d0c0;border-radius:8px;font-size:13px;font-family:inherit;background:#fff;color:#2c2c2a;}
+  .fg input:focus,.fg select:focus,.fg textarea:focus{outline:none;border-color:#c9a84c;}
+  .fg textarea{height:75px;resize:none;}
+  .res-btn{width:100%;padding:12px;background:#1a1209;color:#c9a84c;border:1px solid #c9a84c;border-radius:12px;font-size:13px;letter-spacing:1px;cursor:pointer;font-family:inherit;font-weight:600;transition:all 0.2s;margin-top:6px;}
+  .res-btn:hover{background:#c9a84c;color:#1a1209;}
+
+  /* GALLERY */
+  .gsec{padding:16px 16px 24px;}
+  .gsec h2{font-size:15px;font-weight:600;color:#2c2c2a;margin-bottom:14px;}
+  .ggrid{display:grid;grid-template-columns:1fr 1fr;gap:8px;margin-bottom:12px;}
+  .gc{border-radius:12px;overflow:hidden;aspect-ratio:1;background:#fff;border:1px solid #e8e0d0;display:flex;align-items:center;justify-content:center;flex-direction:column;gap:6px;cursor:pointer;position:relative;}
+  .gc img{width:100%;height:100%;object-fit:cover;position:absolute;top:0;left:0;}
+  .gc .glabel{font-size:10px;color:#888;z-index:1;}
+  .gc i{font-size:28px;color:#c9a84c;opacity:0.4;z-index:1;}
+  .gadd-btn{width:100%;padding:11px;background:#1a1209;color:#c9a84c;border:1px solid #c9a84c;border-radius:12px;font-size:12px;cursor:pointer;font-family:inherit;font-weight:600;transition:all 0.2s;margin-bottom:8px;}
+  .gadd-btn:hover{background:#c9a84c;color:#1a1209;}
+  .g-hint{text-align:center;font-size:11px;color:#aaa;}
+
+  /* ABOUT */
+  .absec{padding:16px 16px 24px;}
+  .ab-banner{background:#1a1209;border-radius:12px;padding:18px;margin-bottom:16px;text-align:center;}
+  .ab-banner h2{color:#c9a84c;font-size:15px;letter-spacing:2px;font-weight:600;}
+  .ab-banner p{color:#a08c6e;font-size:12px;margin-top:7px;line-height:1.7;}
+  .clist{display:flex;flex-direction:column;gap:8px;margin-bottom:20px;}
+  .cr{display:flex;align-items:center;gap:12px;background:#fff;border:1px solid #e8e0d0;border-radius:12px;padding:12px 13px;}
+  .cr i{font-size:20px;color:#c9a84c;flex-shrink:0;}
+  .cr .ct{flex:1;}
+  .cr .ct p:first-child{font-size:10px;color:#888;letter-spacing:0.5px;}
+  .cr .ct p:last-child{font-size:13px;color:#2c2c2a;font-weight:500;margin-top:2px;}
+  .edit-btn{background:none;border:1px solid #d8d0c0;border-radius:8px;padding:4px 10px;font-size:10px;color:#888;cursor:pointer;font-family:inherit;flex-shrink:0;}
+  .edit-btn:hover{border-color:#c9a84c;color:#c9a84c;}
+
+  /* ADMIN - ADD MEAL */
+  .admin-sec{border-top:1px solid #e8e0d0;padding:18px 16px 24px;}
+  .admin-sec h3{font-size:11px;letter-spacing:1.5px;color:#c9a84c;text-transform:uppercase;margin-bottom:14px;}
+  .admin-form{background:#fff;border:1px solid #e8e0d0;border-radius:12px;padding:16px;}
+  .aflex{display:grid;grid-template-columns:1fr 1fr;gap:8px;}
+  .admin-btn{width:100%;padding:10px;background:#1a1209;color:#c9a84c;border:1px solid #c9a84c;border-radius:10px;font-size:12px;cursor:pointer;font-family:inherit;font-weight:600;margin-top:10px;transition:all 0.2s;}
+  .admin-btn:hover{background:#c9a84c;color:#1a1209;}
+
+  /* MODAL */
+  .modal-overlay{display:none;position:fixed;inset:0;background:rgba(0,0,0,0.6);z-index:999;align-items:center;justify-content:center;padding:20px;}
+  .modal-overlay.open{display:flex;}
+  .modal{background:#faf8f4;border-radius:16px;padding:20px;width:100%;max-width:340px;}
+  .modal h3{font-size:14px;font-weight:600;color:#2c2c2a;margin-bottom:14px;}
+  .modal-btns{display:flex;gap:8px;margin-top:14px;}
+  .modal-btns button{flex:1;padding:10px;border-radius:10px;font-size:13px;cursor:pointer;font-family:inherit;font-weight:500;}
+  .mbtn-cancel{background:none;border:1px solid #d8d0c0;color:#888;}
+  .mbtn-ok{background:#1a1209;color:#c9a84c;border:1px solid #c9a84c;}
+
+  /* TOAST */
+  .toast{position:fixed;bottom:24px;left:50%;transform:translateX(-50%);background:#1a1209;color:#c9a84c;border:1px solid #c9a84c;border-radius:10px;padding:10px 20px;font-size:13px;font-weight:500;z-index:9999;opacity:0;transition:opacity 0.3s;pointer-events:none;white-space:nowrap;}
+  .toast.show{opacity:1;}
+
+  /* CONFIRMATION */
+  .confirm-box{background:#e8f5e9;border:1px solid #a5d6a7;border-radius:10px;padding:12px 14px;margin-top:12px;font-size:12px;color:#2e7d32;display:none;}
+  .confirm-box.show{display:block;}
+
+  @media(min-width:441px){
+    body{padding:20px 0;}
+    .app{border-radius:20px;min-height:auto;box-shadow:0 8px 40px rgba(0,0,0,0.25);}
+    .nav{border-radius:0;}
+  }
+</style>
+</head>
+<body>
+<div class="app">
+
+  <div class="hdr">
+    <div class="logo"><span>MB</span></div>
+    <h1>Manmie Bar</h1>
+    <p class="sub">Restoran &amp; Bar</p>
+    <p class="tag">Gou lakay, chalè kè</p>
+  </div>
+
+  <div class="nav" id="nav">
+    <button class="nb active" onclick="goTab('home',this)"><i class="ti ti-home"></i>Akèy</button>
+    <button class="nb" onclick="goTab('menu',this)"><i class="ti ti-tools-kitchen-2"></i>Meni</button>
+    <button class="nb" onclick="goTab('order',this)"><i class="ti ti-shopping-cart"></i>Kòmand</button>
+    <button class="nb" onclick="goTab('rezev',this)"><i class="ti ti-calendar-check"></i>Rezèv</button>
+    <button class="nb" onclick="goTab('galri',this)"><i class="ti ti-photo"></i>Galri</button>
+    <button class="nb" onclick="goTab('about',this)"><i class="ti ti-info-circle"></i>Enfò</button>
+  </div>
+
+  <!-- HOME -->
+  <div class="sec active" id="tab-home">
+    <div class="hero">
+      <p class="hero-t">Bon vini nan Manmie Bar</p>
+      <p class="hero-s">Manje ayisyen otantik, sèvi ak chalè,<br>tradisyon, ak renmen — tankou lakay ou.</p>
+    </div>
+    <div class="hcard" style="margin-top:16px;">
+      <h3>Orè nou</h3>
+      <div class="hr"><span>Lendi – Vandredi</span><span>11:00 AM – 10:00 PM</span></div>
+      <div class="hr"><span>Samdi</span><span>10:00 AM – 11:00 PM</span></div>
+      <div class="hr"><span>Dimanch</span><span>10:00 AM – 9:00 PM</span></div>
+    </div>
+    <div class="fgrid">
+      <div class="fc" onclick="goTab('menu',document.querySelector('.nb:nth-child(2)'))"><i class="ti ti-tools-kitchen-2"></i><p>Wè meni nou</p></div>
+      <div class="fc" onclick="goTab('order',document.querySelector('.nb:nth-child(3)'))"><i class="ti ti-shopping-cart"></i><p>Fè kòmand</p></div>
+      <div class="fc" onclick="goTab('rezev',document.querySelector('.nb:nth-child(4)'))"><i class="ti ti-armchair"></i><p>Rezève tab</p></div>
+      <div class="fc" onclick="goTab('about',document.querySelector('.nb:nth-child(6)'))"><i class="ti ti-map-pin"></i><p>Jwenn nou</p></div>
+    </div>
+  </div>
+
+  <!-- MENU -->
+  <div class="sec" id="tab-menu">
+    <div class="mhdr"><h2>Meni nou an</h2></div>
+    <div class="cats">
+      <button class="cp active" onclick="filterM('tout',this)">Tout</button>
+      <button class="cp" onclick="filterM('plat',this)">Plat Prensipal</button>
+      <button class="cp" onclick="filterM('soupe',this)">Soupe</button>
+      <button class="cp" onclick="filterM('bwason',this)">Bwason</button>
+      <button class="cp" onclick="filterM('desè',this)">Desè</button>
+    </div>
+    <div class="mitems" id="menu-list"></div>
+  </div>
+
+  <!-- ORDER -->
+  <div class="sec" id="tab-order">
+    <div class="osec">
+      <h2>Kòmand pou livrezon / pran</h2>
+      <div class="olitems" id="order-list"></div>
+      <div class="ototal"><span>Total:</span><span id="order-total">0 HTG</span></div>
+      <div class="mc-box">
+        <div class="mc-logo">
+          <div class="mc-icon">MC</div>
+          <span>Peye ak MonCash</span>
+        </div>
+        <label class="mc-label">Nimewo MonCash ou</label>
+        <input class="mc-input" id="mc-num" type="tel" placeholder="+509 ..." />
+        <label class="mc-label">Non ou konplè</label>
+        <input class="mc-input" id="mc-name" type="text" placeholder="Non konplè ou" />
+        <label class="mc-label">Adrès oswa nòt livrezon</label>
+        <input class="mc-input" id="mc-addr" type="text" placeholder="Adrès ou / Pran sou plas" />
+      </div>
+      <button class="pay-btn" onclick="confirmOrder()"><i class="ti ti-currency-dollar" style="font-size:15px;vertical-align:-2px;margin-right:5px;"></i>Konfime kòmand ak MonCash</button>
+      <div class="confirm-box" id="order-confirm">Kòmand ou a voye avèk siksè! Nou pral kontakte ou avan pou konfime peman MonCash ou a. Mèsi!</div>
+    </div>
+  </div>
+
+  <!-- RESERVATION -->
+  <div class="sec" id="tab-rezev">
+    <div class="rsec">
+      <h2>Rezève yon tab</h2>
+      <div class="fg"><label>Non konplè</label><input type="text" placeholder="Non ou" /></div>
+      <div class="fg"><label>Nimewo telefòn</label><input type="tel" placeholder="+509 ..." /></div>
+      <div class="fg"><label>Dat</label><input type="date" /></div>
+      <div class="fg"><label>Lè</label>
+        <select>
+          <option>12:00 PM</option><option>1:00 PM</option><option>2:00 PM</option>
+          <option>6:00 PM</option><option>7:00 PM</option><option>8:00 PM</option>
+        </select>
+      </div>
+      <div class="fg"><label>Kantite moun</label>
+        <select><option>1</option><option>2</option><option>3</option><option>4</option><option>5+</option></select>
+      </div>
+      <div class="fg"><label>Demann espesyal</label><textarea placeholder="Anivèsè, alèji, elatrye..."></textarea></div>
+      <button class="res-btn" onclick="showToast('Rezèvasyon voye! Nou pral konfime li avan.')">Konfime rezèvasyon</button>
+    </div>
+  </div>
+
+  <!-- GALLERY -->
+  <div class="sec" id="tab-galri">
+    <div class="gsec">
+      <h2>Galri foto</h2>
+      <div class="ggrid" id="gallery-grid"></div>
+      <input type="file" id="photo-input" accept="image/*" multiple style="display:none;" onchange="addPhotos(this)" />
+      <button class="gadd-btn" onclick="document.getElementById('photo-input').click()">
+        <i class="ti ti-camera" style="font-size:14px;vertical-align:-2px;margin-right:5px;"></i>Ajoute foto nouvo
+      </button>
+      <p class="g-hint">Ajoute foto manje, anbyans, evènman espesyal, ak plis ankò.</p>
+    </div>
+  </div>
+
+  <!-- ABOUT -->
+  <div class="sec" id="tab-about">
+    <div class="absec">
+      <div class="ab-banner">
+        <h2>Manmie Bar Restaurant</h2>
+        <p>Yon restoran fanmi k ap pote gou otantik manje ayisyen ak chalè kè nan tab ou chak jou.</p>
+      </div>
+      <div class="clist">
+        <div class="cr"><i class="ti ti-map-pin"></i><div class="ct"><p>ADRÈS</p><p id="disp-address">Tape adrès restoran an...</p></div><button class="edit-btn" onclick="openEdit('address')">Chanje</button></div>
+        <div class="cr"><i class="ti ti-phone"></i><div class="ct"><p>TELEFÒN</p><p id="disp-phone">Tape nimewo telefòn...</p></div><button class="edit-btn" onclick="openEdit('phone')">Chanje</button></div>
+        <div class="cr"><i class="ti ti-brand-whatsapp"></i><div class="ct"><p>WHATSAPP</p><p id="disp-whatsapp">Tape nimewo WhatsApp...</p></div><button class="edit-btn" onclick="openEdit('whatsapp')">Chanje</button></div>
+        <div class="cr"><i class="ti ti-brand-facebook"></i><div class="ct"><p>FACEBOOK</p><p id="disp-facebook">Tape non paj Facebook...</p></div><button class="edit-btn" onclick="openEdit('facebook')">Chanje</button></div>
+      </div>
+
+      <div class="admin-sec">
+        <h3>Ajoute yon manje nan meni</h3>
+        <div class="admin-form">
+          <div class="aflex">
+            <div class="fg"><label>Non manje</label><input id="new-name" type="text" placeholder="Eks: Griot" /></div>
+            <div class="fg"><label>Pri (HTG)</label><input id="new-price" type="number" placeholder="350" /></div>
+          </div>
+          <div class="fg"><label>Deskripsyon kout</label><input id="new-desc" type="text" placeholder="Eks: Kochon fri ak bannann peze" /></div>
+          <div class="fg"><label>Kategori</label>
+            <select id="new-cat">
+              <option value="plat">Plat Prensipal</option>
+              <option value="soupe">Soupe</option>
+              <option value="bwason">Bwason</option>
+              <option value="desè">Desè</option>
+            </select>
+          </div>
+          <div class="fg"><label>Foto manje (opsyonèl)</label><input type="file" id="new-img" accept="image/*" style="font-size:12px;" /></div>
+          <button class="admin-btn" onclick="addMeal()"><i class="ti ti-plus" style="font-size:13px;vertical-align:-2px;margin-right:4px;"></i>Ajoute manje sa nan meni</button>
+        </div>
+      </div>
+    </div>
+  </div>
+
+</div>
+
+<!-- EDIT MODAL -->
+<div class="modal-overlay" id="edit-modal">
+  <div class="modal">
+    <h3 id="modal-title">Chanje enfòmasyon</h3>
+    <div class="fg"><label id="modal-label">Valè</label><input id="modal-input" type="text" style="width:100%;padding:9px 11px;border:1px solid #d8d0c0;border-radius:8px;font-size:13px;font-family:inherit;" /></div>
+    <div class="modal-btns">
+      <button class="mbtn-cancel" onclick="closeEdit()">Anile</button>
+      <button class="mbtn-ok" onclick="saveEdit()">Sovgade</button>
+    </div>
+  </div>
+</div>
+
+<div class="toast" id="toast"></div>
+
+<script>
+var menu=JSON.parse(localStorage.getItem("mb_menu")||"null")||[
+  {name:"Griot ak Bannann Peze",desc:"Kochon fri ak bannann peze",price:350,cat:"plat",img:""},
+  {name:"Poulet an Sòs",desc:"Poul bouyi nan sòs kreyòl",price:300,cat:"plat",img:""},
+  {name:"Riz Djon Djon",desc:"Riz nwa ayisyen, yon spesyalite",price:250,cat:"plat",img:""},
+  {name:"Soup Joumou",desc:"Soup joumou tradisyonèl",price:200,cat:"soupe",img:""},
+  {name:"Bouyon Bèf",desc:"Bouyon bèf rich ak legim",price:220,cat:"soupe",img:""},
+  {name:"Jus Kokoye",desc:"Jus kokoye fre",price:100,cat:"bwason",img:""},
+  {name:"Akasan",desc:"Bwason mayi krèmèz",price:80,cat:"bwason",img:""},
+  {name:"Pen Patat",desc:"Gato patat dous",price:120,cat:"desè",img:""},
+  {name:"Douce Makòs",desc:"Bonbon kokoye ayisyen",price:60,cat:"desè",img:""}
+];
+var cart=JSON.parse(localStorage.getItem("mb_cart")||"null")||{};
+var galleryPhotos=JSON.parse(localStorage.getItem("mb_gallery")||"null")||[];
+var contactInfo=JSON.parse(localStorage.getItem("mb_contact")||"null")||{address:"",phone:"",whatsapp:"",facebook:""};
+var editField="";
+
+function saveMenu(){localStorage.setItem("mb_menu",JSON.stringify(menu));}
+function saveCart(){localStorage.setItem("mb_cart",JSON.stringify(cart));}
+function saveGallery(){localStorage.setItem("mb_gallery",JSON.stringify(galleryPhotos));}
+function saveContact(){localStorage.setItem("mb_contact",JSON.stringify(contactInfo));}
+
+// restore contact info display on load
+(function(){
+  Object.keys(contactInfo).forEach(function(field){
+    var el=document.getElementById("disp-"+field);
+    if(el && contactInfo[field]) el.textContent=contactInfo[field];
+  });
+})();
+
+
+function renderMenu(cat){
+  var list=document.getElementById("menu-list");
+  var items=cat==="tout"?menu:menu.filter(function(i){return i.cat===cat;});
+  if(items.length===0){list.innerHTML='<p style="text-align:center;color:#aaa;font-size:13px;padding:30px 0;">Pa gen manje nan kategori sa a.</p>';return;}
+  list.innerHTML=items.map(function(item){
+    var realIdx=menu.indexOf(item);
+    var imgHtml=item.img?'<img src="'+item.img+'" alt="'+item.name+'" />':'<i class="ti ti-tools-kitchen-2"></i>';
+    return '<div class="mi"><div class="mi-img">'+imgHtml+'</div><div class="mi-body"><h4>'+item.name+'</h4><p>'+item.desc+'</p></div><div class="mi-right"><div class="iprice">'+item.price+' HTG</div><button class="abtn" onclick="addCart('+realIdx+')">+ Ajoute</button></div></div>';
+  }).join("");
+}
+renderMenu("tout");
+
+function filterM(cat,el){
+  document.querySelectorAll(".cp").forEach(function(p){p.classList.remove("active");});
+  el.classList.add("active");
+  renderMenu(cat);
+}
+
+function addCart(idx){
+  cart[idx]=(cart[idx]||0)+1;
+  saveCart();
+  showToast(menu[idx].name+" ajoute nan panye!");
+  renderOrder();
+}
+
+function renderOrder(){
+  var list=document.getElementById("order-list");
+  var keys=Object.keys(cart).filter(function(k){return cart[k]>0;});
+  if(keys.length===0){
+    list.innerHTML='<div class="empty-cart"><i class="ti ti-shopping-cart-off"></i>Panye ou vid.<br>Ale nan Meni pou ajoute manje.</div>';
+    document.getElementById("order-total").textContent="0 HTG";
+    return;
+  }
+  var total=0;
+  list.innerHTML=keys.map(function(k){
+    var item=menu[parseInt(k)];
+    total+=item.price*cart[k];
+    return '<div class="oi"><div class="oi-left"><h4>'+item.name+'</h4><p>'+item.price+' HTG &times; '+cart[k]+'</p></div><div class="oi-right"><button class="qty-btn" onclick="chgQty('+k+',-1)">&#8722;</button><span class="qty-n">'+cart[k]+'</span><button class="qty-btn" onclick="chgQty('+k+',1)">+</button></div></div>';
+  }).join("");
+  document.getElementById("order-total").textContent=total.toLocaleString()+" HTG";
+}
+renderOrder();
+
+function chgQty(k,d){
+  cart[k]=(cart[k]||0)+d;
+  if(cart[k]<=0)delete cart[k];
+  saveCart();
+  renderOrder();
+}
+
+function confirmOrder(){
+  var num=document.getElementById("mc-num").value.trim();
+  var name=document.getElementById("mc-name").value.trim();
+  if(!num||!name){showToast("Tanpri ranpli nimewo MonCash ak non ou.");return;}
+  if(Object.keys(cart).filter(function(k){return cart[k]>0;}).length===0){showToast("Panye ou vid. Ajoute manje anvan.");return;}
+  var conf=document.getElementById("order-confirm");
+  conf.classList.add("show");
+  cart={};
+  saveCart();
+  renderOrder();
+  document.getElementById("mc-num").value="";
+  document.getElementById("mc-name").value="";
+  document.getElementById("mc-addr").value="";
+  setTimeout(function(){conf.classList.remove("show");},6000);
+}
+
+function renderGallery(){
+  var grid=document.getElementById("gallery-grid");
+  var html="";
+  galleryPhotos.forEach(function(src,i){
+    html+='<div class="gc"><img src="'+src+'" alt="Foto '+(i+1)+'" /></div>';
+  });
+  var empties=Math.max(0,6-galleryPhotos.length);
+  for(var i=0;i<Math.min(empties,2);i++){
+    html+='<div class="gc" onclick="document.getElementById(\'photo-input\').click()"><i class="ti ti-plus"></i><span class="glabel">Ajoute foto</span></div>';
+  }
+  grid.innerHTML=html;
+}
+renderGallery();
+
+function addPhotos(input){
+  var files=Array.from(input.files);
+  var loaded=0;
+  files.forEach(function(f){
+    var r=new FileReader();
+    r.onload=function(e){galleryPhotos.push(e.target.result);loaded++;if(loaded===files.length){saveGallery();renderGallery();showToast(loaded+" foto ajoute ak siksè!");}};
+    r.readAsDataURL(f);
+  });
+  input.value="";
+}
+
+function addMeal(){
+  var name=document.getElementById("new-name").value.trim();
+  var price=parseInt(document.getElementById("new-price").value)||0;
+  var desc=document.getElementById("new-desc").value.trim();
+  var cat=document.getElementById("new-cat").value;
+  var imgInput=document.getElementById("new-img");
+  if(!name||!price){showToast("Tanpri mete non manje ak pri.");return;}
+  function finish(imgData){
+    menu.push({name:name,price:price,desc:desc||"",cat:cat,img:imgData||""});
+    saveMenu();
+    renderMenu("tout");
+    document.querySelectorAll(".cp").forEach(function(p){p.classList.remove("active");});
+    document.querySelector(".cp").classList.add("active");
+    document.getElementById("new-name").value="";
+    document.getElementById("new-price").value="";
+    document.getElementById("new-desc").value="";
+    document.getElementById("new-img").value="";
+    showToast(name+" ajoute nan meni ak siksè!");
+  }
+  if(imgInput.files&&imgInput.files[0]){
+    var r=new FileReader();
+    r.onload=function(e){finish(e.target.result);};
+    r.readAsDataURL(imgInput.files[0]);
+  }else{finish("");}
+}
+
+var modalLabels={address:"Adrès restoran",phone:"Nimewo telefòn",whatsapp:"Nimewo WhatsApp (+509...)",facebook:"Non paj Facebook"};
+function openEdit(field){
+  editField=field;
+  document.getElementById("modal-title").textContent="Chanje "+modalLabels[field];
+  document.getElementById("modal-label").textContent=modalLabels[field];
+  document.getElementById("modal-input").value=contactInfo[field]||"";
+  document.getElementById("edit-modal").classList.add("open");
+}
+function closeEdit(){document.getElementById("edit-modal").classList.remove("open");}
+function saveEdit(){
+  var val=document.getElementById("modal-input").value.trim();
+  contactInfo[editField]=val;
+  saveContact();
+  document.getElementById("disp-"+editField).textContent=val||"Tape enfòmasyon...";
+  closeEdit();
+  showToast("Enfòmasyon sovgade!");
+}
+
+function goTab(id,btn){
+  document.querySelectorAll(".sec").forEach(function(s){s.classList.remove("active");});
+  document.querySelectorAll(".nb").forEach(function(b){b.classList.remove("active");});
+  document.getElementById("tab-"+id).classList.add("active");
+  if(btn)btn.classList.add("active");
+  window.scrollTo(0,0);
+}
+
+var toastTimer;
+function showToast(msg){
+  var t=document.getElementById("toast");
+  t.textContent=msg;
+  t.classList.add("show");
+  clearTimeout(toastTimer);
+  toastTimer=setTimeout(function(){t.classList.remove("show");},3000);
+}
+
+document.getElementById("edit-modal").addEventListener("click",function(e){if(e.target===this)closeEdit();});
+
+if("serviceWorker" in navigator){
+  window.addEventListener("load",function(){
+    navigator.serviceWorker.register("sw.js").catch(function(err){console.log("SW registration failed:",err);});
+  });
+}
+</script>
+</body>
+</html>
