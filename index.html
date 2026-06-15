@@ -1,0 +1,577 @@
+<!DOCTYPE html>
+<html lang="ht">
+<head>
+<meta charset="UTF-8" />
+<meta name="viewport" content="width=device-width, initial-scale=1.0, viewport-fit=cover" />
+<title>Manmie Bar Restaurant</title>
+<meta name="description" content="Manje ayisyen otantik - Meni, Kòmand, Rezèvasyon, ak Galri" />
+<meta name="theme-color" content="#1a1209" />
+<meta name="mobile-web-app-capable" content="yes" />
+<meta name="apple-mobile-web-app-capable" content="yes" />
+<meta name="apple-mobile-web-app-status-bar-style" content="black-translucent" />
+<meta name="apple-mobile-web-app-title" content="Manmie Bar" />
+<link rel="manifest" href="manifest.json" />
+<link rel="icon" href="icons/icon-192.png" />
+<link rel="apple-touch-icon" href="icons/icon-192.png" />
+<link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/@tabler/icons-webfont@latest/dist/tabler-icons.min.css" />
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link href="https://fonts.googleapis.com/css2?family=Playfair+Display:ital,wght@0,500;0,600;0,700;1,500;1,600&family=Poppins:wght@400;500;600;700&display=swap" rel="stylesheet">
+<script src="https://www.gstatic.com/firebasejs/10.12.2/firebase-app-compat.js"></script>
+<script src="https://www.gstatic.com/firebasejs/10.12.2/firebase-database-compat.js"></script>
+<script src="firebase-config.js"></script>
+<style>
+  :root{
+    --green-deep:#0d2818;
+    --green-mid:#1a4d2e;
+    --cream:#f7f0e3;
+    --orange:#d4691e;
+    --gold:#c9a84c;
+    --off-white:#fffbf5;
+    --ink:#1f2a22;
+  }
+  *{box-sizing:border-box;margin:0;padding:0;}
+  body{font-family:'Poppins',system-ui,-apple-system,sans-serif;background:var(--green-deep);min-height:100vh;display:flex;justify-content:center;align-items:flex-start;padding:0;}
+  .app{width:100%;max-width:440px;margin:0 auto;background:var(--cream);min-height:100vh;display:flex;flex-direction:column;position:relative;}
+
+  h1,h2,h3,h4{font-family:'Playfair Display',Georgia,serif;}
+
+  /* HEADER */
+  .hdr{background:var(--green-deep);padding:26px 20px 18px;text-align:center;position:relative;overflow:hidden;}
+  .hdr::before,.hdr::after{content:'';position:absolute;font-size:90px;color:rgba(255,255,255,0.04);font-family:'Playfair Display',serif;line-height:1;pointer-events:none;}
+  .hdr::before{content:'🌴';left:-18px;top:-10px;transform:rotate(-12deg);font-size:70px;opacity:0.12;}
+  .hdr::after{content:'🌴';right:-18px;top:-10px;transform:rotate(12deg) scaleX(-1);font-size:70px;opacity:0.12;}
+  .logo{width:64px;height:64px;border-radius:50%;border:2px solid var(--gold);display:flex;align-items:center;justify-content:center;margin:0 auto 10px;position:relative;z-index:1;background:rgba(255,255,255,0.03);}
+  .logo span{font-size:20px;color:var(--gold);font-weight:600;letter-spacing:1px;font-family:'Playfair Display',serif;}
+  .hdr h1{color:var(--off-white);font-size:24px;font-weight:700;letter-spacing:0.5px;position:relative;z-index:1;}
+  .hdr .sub{color:var(--orange);font-size:11px;margin-top:4px;letter-spacing:2.5px;font-weight:600;text-transform:uppercase;position:relative;z-index:1;}
+  .hdr .tag{color:rgba(247,240,227,0.55);font-size:12px;margin-top:8px;font-style:italic;font-family:'Playfair Display',serif;position:relative;z-index:1;}
+
+  /* NAV */
+  .nav{display:flex;background:var(--green-deep);border-bottom:1px solid rgba(255,255,255,0.06);position:sticky;top:0;z-index:100;}
+  .nb{flex:1;padding:11px 2px 9px;background:none;border:none;border-top:2px solid transparent;cursor:pointer;display:flex;flex-direction:column;align-items:center;gap:3px;color:rgba(247,240,227,0.4);font-size:9px;letter-spacing:0.4px;transition:color 0.2s;font-family:'Poppins',inherit;font-weight:500;}
+  .nb.active{color:var(--orange);border-top:2px solid var(--orange);}
+  .nb i{font-size:18px;}
+
+  /* SECTIONS */
+  .sec{display:none;flex:1;}
+  .sec.active{display:block;}
+
+  /* HOME - HERO */
+  .hero{position:relative;min-height:380px;display:flex;flex-direction:column;justify-content:center;padding:36px 24px 56px;background:linear-gradient(135deg,var(--green-deep) 0%,var(--green-mid) 100%);background-size:cover;background-position:center;overflow:hidden;}
+  .hero-bg{position:absolute;inset:0;background-size:cover;background-position:center;}
+  .hero-overlay{position:absolute;inset:0;background:linear-gradient(180deg,rgba(13,40,24,0.55) 0%,rgba(13,40,24,0.75) 70%,rgba(13,40,24,0.95) 100%);}
+  .hero-content{position:relative;z-index:2;}
+  .hero-eyebrow{color:var(--orange);font-family:'Playfair Display',serif;font-style:italic;font-size:18px;font-weight:500;margin-bottom:4px;}
+  .hero-t{color:var(--off-white);font-size:30px;font-weight:700;line-height:1.15;font-family:'Playfair Display',serif;}
+  .hero-s{color:rgba(247,240,227,0.85);font-size:13px;margin-top:12px;line-height:1.7;max-width:280px;}
+  .hero-divider{display:flex;align-items:center;gap:8px;margin:14px 0;}
+  .hero-divider .ln{width:32px;height:1px;background:var(--gold);}
+  .hero-divider i{color:var(--gold);font-size:13px;}
+  .hero-btns{display:flex;flex-direction:column;gap:10px;margin-top:18px;max-width:240px;}
+  .hbtn{padding:13px 18px;border-radius:10px;font-size:12px;font-weight:600;letter-spacing:1.5px;text-align:left;cursor:pointer;font-family:'Poppins',inherit;border:none;display:flex;align-items:center;gap:10px;text-transform:uppercase;transition:opacity 0.2s;}
+  .hbtn:hover{opacity:0.9;}
+  .hbtn-primary{background:var(--orange);color:#fff;}
+  .hbtn-secondary{background:rgba(255,255,255,0.06);color:var(--off-white);border:1px solid rgba(247,240,227,0.4);}
+  .hbtn i{font-size:15px;}
+
+  .wave-divider{position:relative;height:34px;background:var(--cream);margin-top:-30px;}
+  .wave-divider svg{position:absolute;top:-30px;left:0;width:100%;height:34px;display:block;}
+
+  /* HOURS CARD */
+  .hcard{margin:0 16px 18px;background:var(--off-white);border:1px solid #e8dcc8;border-radius:14px;padding:16px 18px;position:relative;z-index:3;}
+  .hcard h3{font-size:11px;letter-spacing:2px;color:var(--orange);text-transform:uppercase;margin-bottom:10px;font-family:'Poppins',inherit;font-weight:600;}
+  .hr{display:flex;justify-content:space-between;font-size:12px;color:#8a7d6c;padding:6px 0;border-bottom:1px solid #f0e8d8;}
+  .hr:last-child{border-bottom:none;}
+  .hr span:last-child{color:var(--green-deep);font-weight:600;}
+
+  /* FEATURE ICON ROW */
+  .frow{display:flex;justify-content:space-around;padding:6px 12px 22px;text-align:center;gap:4px;}
+  .frow-item{flex:1;}
+  .frow-item i{font-size:24px;color:var(--orange);}
+  .frow-item h4{font-size:11px;letter-spacing:1px;color:var(--green-deep);margin-top:8px;text-transform:uppercase;font-family:'Poppins',inherit;font-weight:600;}
+  .frow-item p{font-size:10.5px;color:#8a7d6c;margin-top:4px;line-height:1.5;}
+
+  /* FEATURED DISHES (green section) */
+  .featured{background:var(--green-deep);padding:28px 0 26px;position:relative;}
+  .featured-hdr{text-align:center;padding:0 20px 18px;}
+  .featured-hdr .eyebrow{color:var(--orange);font-size:11px;letter-spacing:2.5px;text-transform:uppercase;font-weight:600;}
+  .featured-hdr h2{color:var(--off-white);font-size:24px;margin-top:6px;font-weight:700;}
+  .featured-scroll{display:flex;gap:12px;overflow-x:auto;padding:0 16px 4px;scroll-snap-type:x mandatory;}
+  .featured-scroll::-webkit-scrollbar{display:none;}
+  .feat-card{flex:0 0 150px;scroll-snap-align:start;background:var(--off-white);border-radius:14px;overflow:hidden;border:1px solid rgba(255,255,255,0.08);}
+  .feat-card .feat-img{width:100%;height:110px;background:var(--green-mid);display:flex;align-items:center;justify-content:center;overflow:hidden;}
+  .feat-card .feat-img img{width:100%;height:100%;object-fit:cover;}
+  .feat-card .feat-img i{font-size:30px;color:var(--gold);opacity:0.5;}
+  .feat-card .feat-body{padding:10px 12px 12px;}
+  .feat-card h4{font-size:13px;color:var(--green-deep);font-weight:700;}
+  .feat-card p{font-size:10.5px;color:#9a8d7a;margin-top:4px;line-height:1.5;}
+  .feat-card .feat-rule{width:24px;height:2px;background:var(--orange);margin-top:8px;border-radius:2px;}
+
+  .fgrid{display:grid;grid-template-columns:1fr 1fr;gap:10px;padding:18px 16px;}
+  .fc{background:var(--off-white);border:1px solid #e8dcc8;border-radius:14px;padding:16px 10px;text-align:center;cursor:pointer;transition:all 0.2s;}
+  .fc:hover{border-color:var(--orange);transform:translateY(-1px);}
+  .fc i{font-size:22px;color:var(--orange);}
+  .fc p{font-size:12px;color:var(--green-deep);margin-top:8px;font-weight:600;}
+
+  /* MENU */
+  .mhdr{padding:20px 16px 4px;background:var(--cream);text-align:center;}
+  .mhdr .eyebrow{color:var(--orange);font-size:11px;letter-spacing:2.5px;text-transform:uppercase;font-weight:600;}
+  .mhdr h2{font-size:22px;font-weight:700;color:var(--green-deep);margin-top:6px;}
+  .cats{display:flex;gap:6px;padding:14px 16px 12px;overflow-x:auto;background:var(--cream);}
+  .cats::-webkit-scrollbar{display:none;}
+  .cp{padding:7px 15px;border-radius:20px;border:1px solid #e0d4bd;font-size:11px;background:var(--off-white);cursor:pointer;white-space:nowrap;color:#8a7d6c;font-family:'Poppins',inherit;font-weight:500;transition:all 0.2s;}
+  .cp.active{background:var(--green-deep);color:var(--gold);border-color:var(--green-deep);}
+  .mitems{padding:0 16px 20px;display:flex;flex-direction:column;gap:10px;}
+  .mi{display:flex;align-items:center;background:var(--off-white);border:1px solid #e8dcc8;border-radius:14px;padding:11px 13px;gap:11px;}
+  .mi-img{width:52px;height:52px;border-radius:10px;background:var(--cream);border:1px solid #e8dcc8;overflow:hidden;flex-shrink:0;display:flex;align-items:center;justify-content:center;}
+  .mi-img img{width:100%;height:100%;object-fit:cover;}
+  .mi-img i{font-size:22px;color:var(--orange);opacity:0.5;}
+  .mi-body{flex:1;}
+  .mi-body h4{font-size:13px;font-weight:700;color:var(--green-deep);font-family:'Playfair Display',serif;}
+  .mi-body p{font-size:11px;color:#9a8d7a;margin-top:2px;}
+  .mi-right{text-align:right;flex-shrink:0;}
+  .iprice{font-size:13px;font-weight:700;color:var(--orange);}
+  .abtn{margin-top:6px;padding:5px 11px;background:var(--green-deep);color:var(--gold);border:1px solid var(--green-deep);border-radius:8px;font-size:10px;cursor:pointer;font-family:'Poppins',inherit;font-weight:600;transition:all 0.2s;}
+  .abtn:hover{background:var(--orange);color:#fff;border-color:var(--orange);}
+
+  /* ORDER */
+  .osec{padding:20px 16px 24px;}
+  .osec h2{font-size:20px;font-weight:700;color:var(--green-deep);margin-bottom:16px;font-family:'Playfair Display',serif;}
+  .olitems{display:flex;flex-direction:column;gap:8px;margin-bottom:14px;}
+  .oi{display:flex;justify-content:space-between;align-items:center;background:var(--off-white);border:1px solid #e8dcc8;border-radius:14px;padding:11px 13px;}
+  .oi-left h4{font-size:13px;font-weight:700;color:var(--green-deep);font-family:'Playfair Display',serif;}
+  .oi-left p{font-size:11px;color:#9a8d7a;}
+  .oi-right{display:flex;align-items:center;gap:8px;}
+  .qty-btn{width:26px;height:26px;border-radius:50%;background:var(--cream);border:1px solid #e0d4bd;cursor:pointer;font-size:16px;display:flex;align-items:center;justify-content:center;font-family:inherit;color:var(--green-deep);}
+  .qty-n{font-size:13px;font-weight:700;min-width:18px;text-align:center;color:var(--green-deep);}
+  .ototal{background:var(--off-white);border:1px solid #e8dcc8;border-radius:14px;padding:12px 14px;display:flex;justify-content:space-between;margin-bottom:14px;}
+  .ototal span:first-child{font-size:13px;color:#9a8d7a;}
+  .ototal span:last-child{font-size:16px;font-weight:700;color:var(--orange);}
+  .mc-box{background:var(--green-deep);border-radius:14px;padding:18px;margin-bottom:14px;}
+  .mc-logo{display:flex;align-items:center;gap:8px;margin-bottom:12px;}
+  .mc-icon{width:32px;height:32px;border-radius:50%;background:var(--gold);display:flex;align-items:center;justify-content:center;font-size:11px;font-weight:700;color:var(--green-deep);}
+  .mc-logo span{color:var(--off-white);font-size:14px;font-weight:600;}
+  .mc-label{font-size:11px;color:rgba(247,240,227,0.6);display:block;margin-bottom:4px;margin-top:10px;}
+  .mc-input{width:100%;background:rgba(0,0,0,0.2);border:1px solid rgba(255,255,255,0.12);border-radius:8px;padding:10px 12px;color:var(--off-white);font-size:13px;font-family:inherit;}
+  .mc-input:focus{outline:none;border-color:var(--gold);}
+  .pay-btn{width:100%;padding:14px;background:var(--orange);color:#fff;border:none;border-radius:12px;font-size:13px;font-weight:700;cursor:pointer;font-family:'Poppins',inherit;letter-spacing:1px;text-transform:uppercase;transition:opacity 0.2s;}
+  .pay-btn:hover{opacity:0.9;}
+  .empty-cart{text-align:center;padding:30px 0;color:#9a8d7a;font-size:13px;}
+  .empty-cart i{font-size:36px;color:#e0d4bd;display:block;margin-bottom:10px;}
+
+  /* RESERVATION */
+  .rsec{padding:20px 16px 24px;}
+  .rsec h2{font-size:20px;font-weight:700;color:var(--green-deep);margin-bottom:16px;font-family:'Playfair Display',serif;}
+  .fg{margin-bottom:12px;}
+  .fg label{font-size:11px;color:#9a8d7a;display:block;margin-bottom:5px;letter-spacing:0.5px;font-weight:500;}
+  .fg input,.fg select,.fg textarea{width:100%;padding:10px 12px;border:1px solid #e0d4bd;border-radius:9px;font-size:13px;font-family:inherit;background:var(--off-white);color:var(--green-deep);}
+  .fg input:focus,.fg select:focus,.fg textarea:focus{outline:none;border-color:var(--orange);}
+  .fg textarea{height:75px;resize:none;}
+  .res-btn{width:100%;padding:13px;background:var(--green-deep);color:var(--gold);border:1px solid var(--green-deep);border-radius:12px;font-size:12px;letter-spacing:1.5px;cursor:pointer;font-family:'Poppins',inherit;font-weight:600;transition:all 0.2s;margin-top:6px;text-transform:uppercase;}
+  .res-btn:hover{background:var(--orange);color:#fff;border-color:var(--orange);}
+
+  /* GALLERY */
+  .gsec{padding:20px 16px 24px;}
+  .gsec h2{font-size:20px;font-weight:700;color:var(--green-deep);margin-bottom:16px;font-family:'Playfair Display',serif;}
+  .ggrid{display:grid;grid-template-columns:1fr 1fr;gap:10px;margin-bottom:12px;}
+  .gc{border-radius:14px;overflow:hidden;aspect-ratio:1;background:var(--off-white);border:1px solid #e8dcc8;display:flex;align-items:center;justify-content:center;flex-direction:column;gap:6px;cursor:pointer;position:relative;}
+  .gc img{width:100%;height:100%;object-fit:cover;position:absolute;top:0;left:0;}
+  .gc .glabel{font-size:10px;color:#9a8d7a;z-index:1;}
+  .gc i{font-size:28px;color:var(--orange);opacity:0.4;z-index:1;}
+  .g-hint{text-align:center;font-size:12px;color:#9a8d7a;padding:20px 0;}
+
+  /* ABOUT */
+  .absec{padding:20px 16px 24px;}
+  .ab-banner{background:var(--green-deep);border-radius:16px;padding:22px 18px;margin-bottom:16px;text-align:center;position:relative;overflow:hidden;}
+  .ab-banner::before{content:'🌴';position:absolute;font-size:60px;opacity:0.06;right:-10px;top:-10px;}
+  .ab-banner h2{color:var(--off-white);font-size:19px;font-weight:700;position:relative;z-index:1;}
+  .ab-banner p{color:rgba(247,240,227,0.7);font-size:12px;margin-top:9px;line-height:1.7;position:relative;z-index:1;}
+  .clist{display:flex;flex-direction:column;gap:8px;margin-bottom:20px;}
+  .cr{display:flex;align-items:center;gap:12px;background:var(--off-white);border:1px solid #e8dcc8;border-radius:14px;padding:13px 14px;}
+  .cr i{font-size:20px;color:var(--orange);flex-shrink:0;}
+  .cr .ct{flex:1;}
+  .cr .ct p:first-child{font-size:10px;color:#9a8d7a;letter-spacing:1px;font-weight:600;}
+  .cr .ct p:last-child{font-size:13px;color:var(--green-deep);font-weight:600;margin-top:3px;}
+
+  /* TOAST */
+  .toast{position:fixed;bottom:24px;left:50%;transform:translateX(-50%);background:var(--green-deep);color:var(--gold);border:1px solid var(--gold);border-radius:10px;padding:10px 20px;font-size:13px;font-weight:500;z-index:9999;opacity:0;transition:opacity 0.3s;pointer-events:none;white-space:nowrap;}
+  .toast.show{opacity:1;}
+
+  /* CONFIRMATION */
+  .confirm-box{background:rgba(212,105,30,0.08);border:1px solid rgba(212,105,30,0.3);border-radius:10px;padding:12px 14px;margin-top:12px;font-size:12px;color:var(--orange);display:none;}
+  .confirm-box.show{display:block;}
+
+  @media(min-width:441px){
+    body{padding:20px 0;}
+    .app{border-radius:20px;min-height:auto;box-shadow:0 8px 40px rgba(0,0,0,0.25);overflow:hidden;}
+    .nav{border-radius:0;}
+  }
+</style>
+</head>
+<body>
+<div class="app">
+
+  <div class="hdr">
+    <div class="logo"><span>MB</span></div>
+    <h1>Manmie Bar</h1>
+    <p class="sub">Restoran &amp; Bar</p>
+    <p class="tag">Gou lakay, chalè kè</p>
+  </div>
+
+  <div class="nav" id="nav">
+    <button class="nb active" onclick="goTab('home',this)"><i class="ti ti-home"></i>Akèy</button>
+    <button class="nb" onclick="goTab('menu',this)"><i class="ti ti-tools-kitchen-2"></i>Meni</button>
+    <button class="nb" onclick="goTab('order',this)"><i class="ti ti-shopping-cart"></i>Kòmand</button>
+    <button class="nb" onclick="goTab('rezev',this)"><i class="ti ti-calendar-check"></i>Rezèv</button>
+    <button class="nb" onclick="goTab('galri',this)"><i class="ti ti-photo"></i>Galri</button>
+    <button class="nb" onclick="goTab('about',this)"><i class="ti ti-info-circle"></i>Enfò</button>
+  </div>
+
+  <!-- HOME -->
+  <div class="sec active" id="tab-home">
+    <div class="hero" id="hero-section">
+      <div class="hero-bg" id="hero-bg"></div>
+      <div class="hero-overlay"></div>
+      <div class="hero-content">
+        <p class="hero-eyebrow">Byenveni nan</p>
+        <h2 class="hero-t" id="disp-welcome">Manmie Bar</h2>
+        <div class="hero-divider"><span class="ln"></span><i class="ti ti-leaf"></i><span class="ln"></span></div>
+        <p class="hero-s" id="disp-tagline">Manje ayisyen otantik, sèvi ak chalè,<br>tradisyon, ak renmen — tankou lakay ou.</p>
+        <div class="hero-btns">
+          <button class="hbtn hbtn-primary" onclick="goTab('rezev',document.querySelector('.nb:nth-child(4)'))"><i class="ti ti-calendar-check"></i>Rezève yon tab</button>
+          <button class="hbtn hbtn-secondary" onclick="goTab('about',document.querySelector('.nb:nth-child(6)'))"><i class="ti ti-phone"></i>Rele nou</button>
+        </div>
+      </div>
+    </div>
+    <div class="wave-divider">
+      <svg viewBox="0 0 440 34" preserveAspectRatio="none" xmlns="http://www.w3.org/2000/svg">
+        <path d="M0,34 L0,18 C60,2 120,30 220,16 C320,2 380,28 440,12 L440,34 Z" fill="var(--cream)"/>
+      </svg>
+    </div>
+
+    <div class="hcard">
+      <h3>Orè nou</h3>
+      <div class="hr"><span>Lendi – Vandredi</span><span id="disp-hours-weekday">11:00 AM – 10:00 PM</span></div>
+      <div class="hr"><span>Samdi</span><span id="disp-hours-sat">10:00 AM – 11:00 PM</span></div>
+      <div class="hr"><span>Dimanch</span><span id="disp-hours-sun">10:00 AM – 9:00 PM</span></div>
+    </div>
+
+    <div class="frow">
+      <div class="frow-item">
+        <i class="ti ti-tools-kitchen-2"></i>
+        <h4>Manje Bon</h4>
+        <p>Plat ayisyen tradisyonèl, fèt ak lanmou.</p>
+      </div>
+      <div class="frow-item">
+        <i class="ti ti-glass-cocktail"></i>
+        <h4>Bwason Siyati</h4>
+        <p>Kòktèl atizanal pou bonus soirée ou.</p>
+      </div>
+      <div class="frow-item">
+        <i class="ti ti-music"></i>
+        <h4>Bon Anbyans</h4>
+        <p>Bon mizik, bon moun, bon souvni.</p>
+      </div>
+    </div>
+
+    <div class="featured">
+      <div class="featured-hdr">
+        <p class="eyebrow">Pi popilè</p>
+        <h2>Gou Ayiti</h2>
+      </div>
+      <div class="featured-scroll" id="featured-scroll"></div>
+    </div>
+
+    <div class="fgrid">
+      <div class="fc" onclick="goTab('menu',document.querySelector('.nb:nth-child(2)'))"><i class="ti ti-tools-kitchen-2"></i><p>Wè meni nou</p></div>
+      <div class="fc" onclick="goTab('order',document.querySelector('.nb:nth-child(3)'))"><i class="ti ti-shopping-cart"></i><p>Fè kòmand</p></div>
+      <div class="fc" onclick="goTab('rezev',document.querySelector('.nb:nth-child(4)'))"><i class="ti ti-armchair"></i><p>Rezève tab</p></div>
+      <div class="fc" onclick="goTab('about',document.querySelector('.nb:nth-child(6)'))"><i class="ti ti-map-pin"></i><p>Jwenn nou</p></div>
+    </div>
+  </div>
+
+  <!-- MENU -->
+  <div class="sec" id="tab-menu">
+    <div class="mhdr"><p class="eyebrow">Eksplore</p><h2>Meni Nou An</h2></div>
+    <div class="cats">
+      <button class="cp active" onclick="filterM('tout',this)">Tout</button>
+      <button class="cp" onclick="filterM('plat',this)">Plat Prensipal</button>
+      <button class="cp" onclick="filterM('soupe',this)">Soupe</button>
+      <button class="cp" onclick="filterM('bwason',this)">Bwason</button>
+      <button class="cp" onclick="filterM('desè',this)">Desè</button>
+    </div>
+    <div class="mitems" id="menu-list"></div>
+  </div>
+
+  <!-- ORDER -->
+  <div class="sec" id="tab-order">
+    <div class="osec">
+      <h2>Kòmand pou livrezon / pran</h2>
+      <div class="olitems" id="order-list"></div>
+      <div class="ototal"><span>Total:</span><span id="order-total">0 HTG</span></div>
+      <div class="mc-box">
+        <div class="mc-logo">
+          <div class="mc-icon">MC</div>
+          <span>Peye ak MonCash</span>
+        </div>
+        <label class="mc-label">Nimewo MonCash ou</label>
+        <input class="mc-input" id="mc-num" type="tel" placeholder="+509 ..." />
+        <label class="mc-label">Non ou konplè</label>
+        <input class="mc-input" id="mc-name" type="text" placeholder="Non konplè ou" />
+        <label class="mc-label">Adrès oswa nòt livrezon</label>
+        <input class="mc-input" id="mc-addr" type="text" placeholder="Adrès ou / Pran sou plas" />
+      </div>
+      <button class="pay-btn" onclick="confirmOrder()"><i class="ti ti-currency-dollar" style="font-size:15px;vertical-align:-2px;margin-right:5px;"></i>Konfime kòmand ak MonCash</button>
+      <div class="confirm-box" id="order-confirm">Kòmand ou a voye avèk siksè! Nou pral kontakte ou avan pou konfime peman MonCash ou a. Mèsi!</div>
+    </div>
+  </div>
+
+  <!-- RESERVATION -->
+  <div class="sec" id="tab-rezev">
+    <div class="rsec">
+      <h2>Rezève yon tab</h2>
+      <div class="fg"><label>Non konplè</label><input type="text" placeholder="Non ou" /></div>
+      <div class="fg"><label>Nimewo telefòn</label><input type="tel" placeholder="+509 ..." /></div>
+      <div class="fg"><label>Dat</label><input type="date" /></div>
+      <div class="fg"><label>Lè</label>
+        <select>
+          <option>12:00 PM</option><option>1:00 PM</option><option>2:00 PM</option>
+          <option>6:00 PM</option><option>7:00 PM</option><option>8:00 PM</option>
+        </select>
+      </div>
+      <div class="fg"><label>Kantite moun</label>
+        <select><option>1</option><option>2</option><option>3</option><option>4</option><option>5+</option></select>
+      </div>
+      <div class="fg"><label>Demann espesyal</label><textarea placeholder="Anivèsè, alèji, elatrye..."></textarea></div>
+      <button class="res-btn" onclick="showToast('Rezèvasyon voye! Nou pral konfime li avan.')">Konfime rezèvasyon</button>
+    </div>
+  </div>
+
+  <!-- GALLERY -->
+  <div class="sec" id="tab-galri">
+    <div class="gsec">
+      <h2>Galri foto</h2>
+      <div class="ggrid" id="gallery-grid"></div>
+      <p class="g-hint" id="gallery-empty-hint" style="display:none;">Poko gen foto. Restoran an ap ajoute foto talè.</p>
+    </div>
+  </div>
+
+  <!-- ABOUT -->
+  <div class="sec" id="tab-about">
+    <div class="absec">
+      <div class="ab-banner">
+        <h2 id="disp-about-title">Manmie Bar Restaurant</h2>
+        <p id="disp-about-text">Yon restoran fanmi k ap pote gou otantik manje ayisyen ak chalè kè nan tab ou chak jou.</p>
+      </div>
+      <div class="clist">
+        <div class="cr"><i class="ti ti-map-pin"></i><div class="ct"><p>ADRÈS</p><p id="disp-address">Chajman...</p></div></div>
+        <div class="cr"><i class="ti ti-phone"></i><div class="ct"><p>TELEFÒN</p><p id="disp-phone">Chajman...</p></div></div>
+        <div class="cr"><i class="ti ti-brand-whatsapp"></i><div class="ct"><p>WHATSAPP</p><p id="disp-whatsapp">Chajman...</p></div></div>
+        <div class="cr"><i class="ti ti-brand-facebook"></i><div class="ct"><p>FACEBOOK</p><p id="disp-facebook">Chajman...</p></div></div>
+      </div>
+      <a href="admin.html" style="display:block;text-align:center;font-size:11px;color:#c9a84c;text-decoration:none;margin-top:6px;padding:8px;">Administrasyon</a>
+    </div>
+  </div>
+
+</div>
+
+<div class="toast" id="toast"></div>
+
+<script>
+var defaultMenu=[
+  {name:"Griot ak Bannann Peze",desc:"Kochon fri ak bannann peze",price:350,cat:"plat",img:""},
+  {name:"Poulet an Sòs",desc:"Poul bouyi nan sòs kreyòl",price:300,cat:"plat",img:""},
+  {name:"Riz Djon Djon",desc:"Riz nwa ayisyen, yon spesyalite",price:250,cat:"plat",img:""},
+  {name:"Soup Joumou",desc:"Soup joumou tradisyonèl",price:200,cat:"soupe",img:""},
+  {name:"Bouyon Bèf",desc:"Bouyon bèf rich ak legim",price:220,cat:"soupe",img:""},
+  {name:"Jus Kokoye",desc:"Jus kokoye fre",price:100,cat:"bwason",img:""},
+  {name:"Akasan",desc:"Bwason mayi krèmèz",price:80,cat:"bwason",img:""},
+  {name:"Pen Patat",desc:"Gato patat dous",price:120,cat:"desè",img:""},
+  {name:"Douce Makòs",desc:"Bonbon kokoye ayisyen",price:60,cat:"desè",img:""}
+];
+var menu=defaultMenu;
+var cart=JSON.parse(localStorage.getItem("mb_cart")||"null")||{};
+
+function saveCart(){localStorage.setItem("mb_cart",JSON.stringify(cart));}
+
+// ---------- FIREBASE LIVE DATA (read-only for visitors) ----------
+var db=null;
+try{
+  if(window.firebaseConfig && window.firebaseConfig.apiKey && window.firebaseConfig.apiKey!=="REPLACE_ME"){
+    firebase.initializeApp(window.firebaseConfig);
+    db=firebase.database();
+  }
+}catch(e){console.log("Firebase init failed:",e);}
+
+if(db){
+  // Menu
+  db.ref("menu").on("value",function(snap){
+    var val=snap.val();
+    menu=val?Object.keys(val).map(function(k){var item=val[k];item._key=k;return item;}):defaultMenu;
+    var activeCat=document.querySelector(".cp.active");
+    renderMenu(activeCat?activeCat.dataset.cat:"tout");
+    renderOrder();
+    renderFeatured();
+  });
+
+  // Site content (text, hours, contact, hero image)
+  db.ref("content").on("value",function(snap){
+    var c=snap.val()||{};
+    setText("disp-welcome",c.welcomeTitle);
+    setText("disp-tagline",c.welcomeText,true);
+    setText("disp-hours-weekday",c.hoursWeekday);
+    setText("disp-hours-sat",c.hoursSat);
+    setText("disp-hours-sun",c.hoursSun);
+    setText("disp-about-title",c.aboutTitle);
+    setText("disp-about-text",c.aboutText);
+    setText("disp-address",c.address);
+    setText("disp-phone",c.phone);
+    setText("disp-whatsapp",c.whatsapp);
+    setText("disp-facebook",c.facebook);
+    var heroBg=document.getElementById("hero-bg");
+    if(c.heroImage){
+      heroBg.style.backgroundImage="url('"+c.heroImage+"')";
+      heroBg.style.display="block";
+    }else{
+      heroBg.style.display="none";
+    }
+  });
+
+  // Gallery
+  db.ref("gallery").on("value",function(snap){
+    var val=snap.val();
+    var photos=val?Object.keys(val).map(function(k){return val[k];}):[];
+    renderGallery(photos);
+  });
+}else{
+  renderFeatured();
+}
+
+function setText(id,val,allowBr){
+  var el=document.getElementById(id);
+  if(!el) return;
+  if(val===undefined||val===null||val==="") return;
+  if(allowBr){el.innerHTML=val;}else{el.textContent=val;}
+}
+
+function renderMenu(cat){
+  var list=document.getElementById("menu-list");
+  cat=cat||"tout";
+  var items=cat==="tout"?menu:menu.filter(function(i){return i.cat===cat;});
+  if(items.length===0){list.innerHTML='<p style="text-align:center;color:#aaa;font-size:13px;padding:30px 0;">Pa gen manje nan kategori sa a.</p>';return;}
+  list.innerHTML=items.map(function(item){
+    var realIdx=menu.indexOf(item);
+    var imgHtml=item.img?'<img src="'+item.img+'" alt="'+item.name+'" />':'<i class="ti ti-tools-kitchen-2"></i>';
+    return '<div class="mi"><div class="mi-img">'+imgHtml+'</div><div class="mi-body"><h4>'+item.name+'</h4><p>'+(item.desc||"")+'</p></div><div class="mi-right"><div class="iprice">'+item.price+' HTG</div><button class="abtn" onclick="addCart('+realIdx+')">+ Ajoute</button></div></div>';
+  }).join("");
+}
+renderMenu("tout");
+
+function renderFeatured(){
+  var scroll=document.getElementById("featured-scroll");
+  if(!scroll) return;
+  var featured=menu.filter(function(i){return i.featured;});
+  var items=featured.length>0?featured:menu.slice(0,5);
+  if(items.length===0){scroll.innerHTML="";return;}
+  scroll.innerHTML=items.map(function(item){
+    var imgHtml=item.img?'<img src="'+item.img+'" alt="'+item.name+'" />':'<i class="ti ti-tools-kitchen-2"></i>';
+    return '<div class="feat-card"><div class="feat-img">'+imgHtml+'</div><div class="feat-body"><h4>'+item.name+'</h4><p>'+(item.desc||"")+'</p><div class="feat-rule"></div></div></div>';
+  }).join("");
+}
+renderFeatured();
+
+function filterM(cat,el){
+  document.querySelectorAll(".cp").forEach(function(p){p.classList.remove("active");});
+  el.classList.add("active");
+  el.dataset.cat=cat;
+  renderMenu(cat);
+}
+
+function addCart(idx){
+  cart[idx]=(cart[idx]||0)+1;
+  saveCart();
+  showToast(menu[idx].name+" ajoute nan panye!");
+  renderOrder();
+}
+
+function renderOrder(){
+  var list=document.getElementById("order-list");
+  var keys=Object.keys(cart).filter(function(k){return cart[k]>0 && menu[parseInt(k)];});
+  if(keys.length===0){
+    list.innerHTML='<div class="empty-cart"><i class="ti ti-shopping-cart-off"></i>Panye ou vid.<br>Ale nan Meni pou ajoute manje.</div>';
+    document.getElementById("order-total").textContent="0 HTG";
+    return;
+  }
+  var total=0;
+  list.innerHTML=keys.map(function(k){
+    var item=menu[parseInt(k)];
+    total+=item.price*cart[k];
+    return '<div class="oi"><div class="oi-left"><h4>'+item.name+'</h4><p>'+item.price+' HTG &times; '+cart[k]+'</p></div><div class="oi-right"><button class="qty-btn" onclick="chgQty('+k+',-1)">&#8722;</button><span class="qty-n">'+cart[k]+'</span><button class="qty-btn" onclick="chgQty('+k+',1)">+</button></div></div>';
+  }).join("");
+  document.getElementById("order-total").textContent=total.toLocaleString()+" HTG";
+}
+renderOrder();
+
+function chgQty(k,d){
+  cart[k]=(cart[k]||0)+d;
+  if(cart[k]<=0)delete cart[k];
+  saveCart();
+  renderOrder();
+}
+
+function confirmOrder(){
+  var num=document.getElementById("mc-num").value.trim();
+  var name=document.getElementById("mc-name").value.trim();
+  if(!num||!name){showToast("Tanpri ranpli nimewo MonCash ak non ou.");return;}
+  if(Object.keys(cart).filter(function(k){return cart[k]>0;}).length===0){showToast("Panye ou vid. Ajoute manje anvan.");return;}
+  var conf=document.getElementById("order-confirm");
+  conf.classList.add("show");
+  cart={};
+  saveCart();
+  renderOrder();
+  document.getElementById("mc-num").value="";
+  document.getElementById("mc-name").value="";
+  document.getElementById("mc-addr").value="";
+  setTimeout(function(){conf.classList.remove("show");},6000);
+}
+
+function renderGallery(photos){
+  var grid=document.getElementById("gallery-grid");
+  var hint=document.getElementById("gallery-empty-hint");
+  if(!photos||photos.length===0){
+    grid.innerHTML="";
+    if(hint)hint.style.display="block";
+    return;
+  }
+  if(hint)hint.style.display="none";
+  grid.innerHTML=photos.map(function(src,i){
+    return '<div class="gc"><img src="'+src+'" alt="Foto '+(i+1)+'" /></div>';
+  }).join("");
+}
+
+function goTab(id,btn){
+  document.querySelectorAll(".sec").forEach(function(s){s.classList.remove("active");});
+  document.querySelectorAll(".nb").forEach(function(b){b.classList.remove("active");});
+  document.getElementById("tab-"+id).classList.add("active");
+  if(btn)btn.classList.add("active");
+  window.scrollTo(0,0);
+}
+
+var toastTimer;
+function showToast(msg){
+  var t=document.getElementById("toast");
+  t.textContent=msg;
+  t.classList.add("show");
+  clearTimeout(toastTimer);
+  toastTimer=setTimeout(function(){t.classList.remove("show");},3000);
+}
+
+if("serviceWorker" in navigator){
+  window.addEventListener("load",function(){
+    navigator.serviceWorker.register("sw.js").catch(function(err){console.log("SW registration failed:",err);});
+  });
+}
+</script>
+</body>
+</html>
