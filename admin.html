@@ -1,0 +1,587 @@
+<!DOCTYPE html>
+<html lang="ht">
+<head>
+<meta charset="UTF-8" />
+<meta name="viewport" content="width=device-width, initial-scale=1.0, viewport-fit=cover" />
+<title>Manmie Bar — Admin</title>
+<meta name="robots" content="noindex, nofollow" />
+<meta name="theme-color" content="#1a1209" />
+<link rel="icon" href="icons/icon-192.png" />
+<link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/@tabler/icons-webfont@latest/dist/tabler-icons.min.css" />
+<script src="https://www.gstatic.com/firebasejs/10.12.2/firebase-app-compat.js"></script>
+<script src="https://www.gstatic.com/firebasejs/10.12.2/firebase-database-compat.js"></script>
+<script src="firebase-config.js"></script>
+<style>
+  *{box-sizing:border-box;margin:0;padding:0;}
+  body{font-family:system-ui,-apple-system,sans-serif;background:#0e0a05;min-height:100vh;display:flex;justify-content:center;align-items:flex-start;padding:0;}
+  .app{width:100%;max-width:480px;margin:0 auto;background:#faf8f4;min-height:100vh;display:flex;flex-direction:column;position:relative;}
+
+  /* HEADER */
+  .hdr{background:#1a1209;padding:22px 20px;text-align:center;position:sticky;top:0;z-index:50;}
+  .hdr h1{color:#c9a84c;font-size:16px;font-weight:600;letter-spacing:2px;}
+  .hdr .sub{color:#a08c6e;font-size:11px;margin-top:4px;letter-spacing:1px;}
+  .hdr .logout{position:absolute;right:16px;top:22px;background:none;border:1px solid #3a2e1a;color:#a08c6e;border-radius:8px;padding:6px 10px;font-size:11px;cursor:pointer;font-family:inherit;}
+
+  /* LOGIN */
+  .login-wrap{flex:1;display:flex;flex-direction:column;justify-content:center;align-items:center;padding:30px;}
+  .login-box{width:100%;max-width:320px;background:#fff;border:1px solid #e8e0d0;border-radius:14px;padding:24px;}
+  .login-box h2{font-size:15px;color:#2c2c2a;margin-bottom:14px;text-align:center;}
+  .login-box input{width:100%;padding:11px 13px;border:1px solid #d8d0c0;border-radius:10px;font-size:14px;font-family:inherit;margin-bottom:10px;}
+  .login-box input:focus{outline:none;border-color:#c9a84c;}
+  .login-box button{width:100%;padding:12px;background:#1a1209;color:#c9a84c;border:1px solid #c9a84c;border-radius:10px;font-size:13px;font-weight:600;cursor:pointer;font-family:inherit;letter-spacing:0.5px;}
+  .login-box .err{color:#c0392b;font-size:12px;margin-top:8px;text-align:center;display:none;}
+  .login-box .err.show{display:block;}
+
+  /* NAV */
+  .nav{display:flex;background:#120d06;border-bottom:1px solid #2a2015;position:sticky;top:73px;z-index:49;overflow-x:auto;}
+  .nav::-webkit-scrollbar{display:none;}
+  .nb{flex:1;min-width:78px;padding:11px 4px 8px;background:none;border:none;cursor:pointer;display:flex;flex-direction:column;align-items:center;gap:3px;color:#6b5b44;font-size:9px;letter-spacing:0.3px;transition:color 0.2s;font-family:inherit;}
+  .nb.active{color:#c9a84c;border-bottom:2px solid #c9a84c;}
+  .nb i{font-size:18px;}
+
+  /* SECTIONS */
+  .sec{display:none;}
+  .sec.active{display:block;}
+  .pad{padding:16px;}
+  .pad h2{font-size:15px;font-weight:600;color:#2c2c2a;margin-bottom:14px;}
+
+  /* CARDS */
+  .card{background:#fff;border:1px solid #e8e0d0;border-radius:12px;padding:14px 16px;margin-bottom:12px;}
+  .card h3{font-size:11px;letter-spacing:1.5px;color:#c9a84c;text-transform:uppercase;margin-bottom:12px;}
+
+  /* FORMS */
+  .fg{margin-bottom:10px;}
+  .fg label{font-size:11px;color:#888;display:block;margin-bottom:4px;letter-spacing:0.5px;}
+  .fg input,.fg select,.fg textarea{width:100%;padding:9px 11px;border:1px solid #d8d0c0;border-radius:8px;font-size:13px;font-family:inherit;background:#fff;color:#2c2c2a;}
+  .fg input:focus,.fg select:focus,.fg textarea:focus{outline:none;border-color:#c9a84c;}
+  .fg textarea{min-height:60px;resize:vertical;}
+  .aflex{display:grid;grid-template-columns:1fr 1fr;gap:8px;}
+  .btn{width:100%;padding:11px;background:#1a1209;color:#c9a84c;border:1px solid #c9a84c;border-radius:10px;font-size:13px;cursor:pointer;font-family:inherit;font-weight:600;transition:all 0.2s;}
+  .btn:hover{background:#c9a84c;color:#1a1209;}
+  .btn-save{background:#c9a84c;color:#1a1209;border:none;}
+  .btn-save:hover{opacity:0.9;background:#c9a84c;}
+
+  /* MENU ITEM LIST */
+  .mi-row{display:flex;align-items:center;background:#fff;border:1px solid #e8e0d0;border-radius:12px;padding:10px 12px;gap:10px;margin-bottom:8px;}
+  .mi-img{width:46px;height:46px;border-radius:10px;background:#f5f0e8;border:1px solid #e8e0d0;overflow:hidden;flex-shrink:0;display:flex;align-items:center;justify-content:center;}
+  .mi-img img{width:100%;height:100%;object-fit:cover;}
+  .mi-img i{font-size:20px;color:#c9a84c;opacity:0.5;}
+  .mi-body{flex:1;min-width:0;}
+  .mi-body h4{font-size:13px;font-weight:600;color:#2c2c2a;white-space:nowrap;overflow:hidden;text-overflow:ellipsis;}
+  .mi-body p{font-size:11px;color:#888;margin-top:2px;white-space:nowrap;overflow:hidden;text-overflow:ellipsis;}
+  .mi-price{font-size:12px;font-weight:600;color:#c9a84c;flex-shrink:0;}
+  .mi-actions{display:flex;gap:6px;flex-shrink:0;}
+  .icon-btn{width:30px;height:30px;border-radius:8px;border:1px solid #d8d0c0;background:#faf8f4;cursor:pointer;display:flex;align-items:center;justify-content:center;font-size:14px;color:#888;}
+  .icon-btn:hover{border-color:#c9a84c;color:#c9a84c;}
+  .icon-btn.danger:hover{border-color:#c0392b;color:#c0392b;}
+
+  /* GALLERY GRID */
+  .ggrid{display:grid;grid-template-columns:1fr 1fr 1fr;gap:8px;margin-bottom:12px;}
+  .gc{position:relative;border-radius:10px;overflow:hidden;aspect-ratio:1;background:#f5f0e8;border:1px solid #e8e0d0;}
+  .gc img{width:100%;height:100%;object-fit:cover;}
+  .gc .gc-del{position:absolute;top:4px;right:4px;width:24px;height:24px;border-radius:50%;background:rgba(0,0,0,0.6);color:#fff;border:none;font-size:14px;display:flex;align-items:center;justify-content:center;cursor:pointer;}
+
+  /* TOAST */
+  .toast{position:fixed;bottom:24px;left:50%;transform:translateX(-50%);background:#1a1209;color:#c9a84c;border:1px solid #c9a84c;border-radius:10px;padding:10px 20px;font-size:13px;font-weight:500;z-index:9999;opacity:0;transition:opacity 0.3s;pointer-events:none;white-space:nowrap;}
+  .toast.show{opacity:1;}
+
+  .cats{display:flex;gap:6px;padding:0 0 12px;overflow-x:auto;}
+  .cats::-webkit-scrollbar{display:none;}
+  .cp{padding:6px 14px;border-radius:20px;border:1px solid #d8d0c0;font-size:11px;background:none;cursor:pointer;white-space:nowrap;color:#888;font-family:inherit;transition:all 0.2s;}
+  .cp.active{background:#1a1209;color:#c9a84c;border-color:#c9a84c;}
+
+  .hint{font-size:11px;color:#aaa;margin-top:6px;}
+  .setup-note{background:#fff8e1;border:1px solid #ffe082;border-radius:10px;padding:12px 14px;font-size:12px;color:#7a5c00;margin:16px;line-height:1.6;}
+
+  @media(min-width:481px){
+    body{padding:20px 0;}
+    .app{border-radius:20px;min-height:auto;box-shadow:0 8px 40px rgba(0,0,0,0.25);}
+  }
+</style>
+</head>
+<body>
+<div class="app">
+
+  <div class="hdr">
+    <h1>MANMIE BAR</h1>
+    <p class="sub">Panel Administrasyon</p>
+    <button class="logout" id="logout-btn" style="display:none;" onclick="logout()">Dekonekte</button>
+  </div>
+
+  <!-- LOGIN -->
+  <div class="login-wrap" id="login-wrap">
+    <div class="login-box">
+      <h2>Antre modpas administratif</h2>
+      <input type="password" id="login-pass" placeholder="Modpas..." onkeydown="if(event.key==='Enter')doLogin()" />
+      <button onclick="doLogin()">Konekte</button>
+      <p class="err" id="login-err">Modpas pa kòrèk.</p>
+    </div>
+  </div>
+
+  <!-- MAIN ADMIN UI -->
+  <div id="admin-main" style="display:none;">
+
+    <div id="config-warning" class="setup-note" style="display:none;">
+      <strong>Firebase poko konfigire.</strong> Ouvri fichye <code>firebase-config.js</code> epi mete enfòmasyon pwojè Firebase ou a pou chanjman ou yo ka aparèt pou tout vizitè.
+    </div>
+
+    <div class="nav">
+      <button class="nb active" onclick="goSec('menu',this)"><i class="ti ti-tools-kitchen-2"></i>Meni</button>
+      <button class="nb" onclick="goSec('content',this)"><i class="ti ti-typography"></i>Tèks</button>
+      <button class="nb" onclick="goSec('contact',this)"><i class="ti ti-address-book"></i>Kontak</button>
+      <button class="nb" onclick="goSec('gallery',this)"><i class="ti ti-photo"></i>Galri</button>
+    </div>
+
+    <!-- MENU MANAGEMENT -->
+    <div class="sec active" id="sec-menu">
+      <div class="pad">
+        <h2>Jere Meni</h2>
+
+        <div class="card">
+          <h3 id="form-title">Ajoute yon manje nouvo</h3>
+          <input type="hidden" id="edit-key" value="" />
+          <div class="aflex">
+            <div class="fg"><label>Non manje</label><input id="m-name" type="text" placeholder="Eks: Griot" /></div>
+            <div class="fg"><label>Pri (HTG)</label><input id="m-price" type="number" placeholder="350" /></div>
+          </div>
+          <div class="fg"><label>Deskripsyon kout</label><input id="m-desc" type="text" placeholder="Eks: Kochon fri ak bannann peze" /></div>
+          <div class="fg"><label>Kategori</label>
+            <select id="m-cat">
+              <option value="plat">Plat Prensipal</option>
+              <option value="soupe">Soupe</option>
+              <option value="bwason">Bwason</option>
+              <option value="desè">Desè</option>
+            </select>
+          </div>
+          <div class="fg"><label>Foto manje (opsyonèl)</label><input type="file" id="m-img" accept="image/*" style="font-size:12px;" /></div>
+          <div id="m-img-preview" style="margin-bottom:10px;"></div>
+          <div class="fg" style="display:flex;align-items:center;gap:8px;margin-bottom:14px;">
+            <input type="checkbox" id="m-featured" style="width:auto;" />
+            <label for="m-featured" style="margin:0;font-size:12px;color:#555;">Montre nan "Pi popilè" sou paj Akèy</label>
+          </div>
+          <button class="btn btn-save" onclick="saveMeal()" id="m-save-btn"><i class="ti ti-plus" style="font-size:13px;vertical-align:-2px;margin-right:4px;"></i>Ajoute nan meni</button>
+          <button class="btn" style="margin-top:8px;display:none;background:none;color:#888;border-color:#d8d0c0;" id="m-cancel-btn" onclick="cancelEdit()">Anile chanjman</button>
+        </div>
+
+        <div class="cats">
+          <button class="cp active" onclick="filterAdmin('tout',this)">Tout</button>
+          <button class="cp" onclick="filterAdmin('plat',this)">Plat Prensipal</button>
+          <button class="cp" onclick="filterAdmin('soupe',this)">Soupe</button>
+          <button class="cp" onclick="filterAdmin('bwason',this)">Bwason</button>
+          <button class="cp" onclick="filterAdmin('desè',this)">Desè</button>
+        </div>
+
+        <div id="menu-admin-list"></div>
+      </div>
+    </div>
+
+    <!-- TEXT / CONTENT -->
+    <div class="sec" id="sec-content">
+      <div class="pad">
+        <h2>Tèks sit la</h2>
+        <div class="card">
+          <h3>Foto Hero (Akèy)</h3>
+          <div id="hero-img-preview" style="margin-bottom:10px;"></div>
+          <input type="file" id="c-heroImg" accept="image/*" style="font-size:12px;" />
+          <p class="hint">Foto sa a ap parèt dèyè tit byenveni sou paj Akèy.</p>
+          <button class="btn" style="margin-top:10px;background:none;color:#c0392b;border-color:#e0c0c0;display:none;" id="hero-img-remove" onclick="removeHeroImage()">Retire foto hero</button>
+        </div>
+        <div class="card">
+          <h3>Paj Akèy</h3>
+          <div class="fg"><label>Tit byenveni</label><input id="c-welcomeTitle" type="text" placeholder="Manmie Bar" /></div>
+          <div class="fg"><label>Tèks byenveni</label><textarea id="c-welcomeText" placeholder="Manje ayisyen otantik..."></textarea></div>
+        </div>
+        <div class="card">
+          <h3>Orè</h3>
+          <div class="fg"><label>Lendi – Vandredi</label><input id="c-hoursWeekday" type="text" placeholder="11:00 AM – 10:00 PM" /></div>
+          <div class="fg"><label>Samdi</label><input id="c-hoursSat" type="text" placeholder="10:00 AM – 11:00 PM" /></div>
+          <div class="fg"><label>Dimanch</label><input id="c-hoursSun" type="text" placeholder="10:00 AM – 9:00 PM" /></div>
+        </div>
+        <div class="card">
+          <h3>Paj Enfò</h3>
+          <div class="fg"><label>Tit baner</label><input id="c-aboutTitle" type="text" placeholder="Manmie Bar Restaurant" /></div>
+          <div class="fg"><label>Tèks deskriptif</label><textarea id="c-aboutText" placeholder="Yon restoran fanmi..."></textarea></div>
+        </div>
+        <button class="btn btn-save" onclick="saveContent()">Sovgade tèks</button>
+      </div>
+    </div>
+
+    <!-- CONTACT -->
+    <div class="sec" id="sec-contact">
+      <div class="pad">
+        <h2>Enfòmasyon kontak</h2>
+        <div class="card">
+          <div class="fg"><label>Adrès restoran</label><input id="ct-address" type="text" placeholder="Adrès..." /></div>
+          <div class="fg"><label>Nimewo telefòn</label><input id="ct-phone" type="text" placeholder="+509 ..." /></div>
+          <div class="fg"><label>Nimewo WhatsApp</label><input id="ct-whatsapp" type="text" placeholder="+509 ..." /></div>
+          <div class="fg"><label>Non paj Facebook</label><input id="ct-facebook" type="text" placeholder="@manmiebar" /></div>
+        </div>
+        <button class="btn btn-save" onclick="saveContact()">Sovgade kontak</button>
+      </div>
+    </div>
+
+    <!-- GALLERY -->
+    <div class="sec" id="sec-gallery">
+      <div class="pad">
+        <h2>Galri foto</h2>
+        <div class="ggrid" id="gallery-admin-grid"></div>
+        <input type="file" id="g-photo-input" accept="image/*" multiple style="display:none;" onchange="addGalleryPhotos(this)" />
+        <button class="btn" onclick="document.getElementById('g-photo-input').click()">
+          <i class="ti ti-camera" style="font-size:14px;vertical-align:-2px;margin-right:5px;"></i>Ajoute foto nouvo
+        </button>
+        <p class="hint">Sa yo ap parèt nan galri pou tout vizitè.</p>
+      </div>
+    </div>
+
+  </div>
+
+</div>
+
+<div class="toast" id="toast"></div>
+
+<script>
+// ---------- AUTH ----------
+var ADMIN_PASSWORD = "manmie2026"; // <-- CHANGE THIS to your own password
+
+function doLogin(){
+  var val=document.getElementById("login-pass").value;
+  if(val===ADMIN_PASSWORD){
+    sessionStorage.setItem("mb_admin","1");
+    showAdmin();
+  }else{
+    document.getElementById("login-err").classList.add("show");
+  }
+}
+function logout(){
+  sessionStorage.removeItem("mb_admin");
+  document.getElementById("admin-main").style.display="none";
+  document.getElementById("logout-btn").style.display="none";
+  document.getElementById("login-wrap").style.display="flex";
+  document.getElementById("login-pass").value="";
+}
+function showAdmin(){
+  document.getElementById("login-wrap").style.display="none";
+  document.getElementById("admin-main").style.display="block";
+  document.getElementById("logout-btn").style.display="block";
+  initFirebase();
+}
+if(sessionStorage.getItem("mb_admin")==="1"){ showAdmin(); }
+
+// ---------- FIREBASE ----------
+var db=null;
+var menu=[];
+var galleryPhotos=[];
+var currentHeroImage="";
+var pendingHeroImg="";
+var firebaseReady=false;
+
+function initFirebase(){
+  if(firebaseReady) return;
+  try{
+    if(window.firebaseConfig && window.firebaseConfig.apiKey && window.firebaseConfig.apiKey!=="REPLACE_ME"){
+      firebase.initializeApp(window.firebaseConfig);
+      db=firebase.database();
+      firebaseReady=true;
+      listenMenu();
+      listenContent();
+      listenContact();
+      listenGallery();
+    }else{
+      document.getElementById("config-warning").style.display="block";
+    }
+  }catch(e){
+    console.log("Firebase init failed:",e);
+    document.getElementById("config-warning").style.display="block";
+  }
+}
+
+function listenMenu(){
+  db.ref("menu").on("value",function(snap){
+    var val=snap.val();
+    menu=val?Object.keys(val).map(function(k){var item=val[k];item._key=k;return item;}):[];
+    var activeCat=document.querySelector("#sec-menu .cp.active");
+    renderMenuAdmin(activeCat?activeCat.dataset.cat:"tout");
+  });
+}
+
+function listenContent(){
+  db.ref("content").on("value",function(snap){
+    var c=snap.val()||{};
+    setVal("c-welcomeTitle",c.welcomeTitle);
+    setVal("c-welcomeText",c.welcomeText?c.welcomeText.replace(/<br>/g,"\n"):"");
+    setVal("c-hoursWeekday",c.hoursWeekday);
+    setVal("c-hoursSat",c.hoursSat);
+    setVal("c-hoursSun",c.hoursSun);
+    setVal("c-aboutTitle",c.aboutTitle);
+    setVal("c-aboutText",c.aboutText);
+    currentHeroImage=c.heroImage||"";
+    var preview=document.getElementById("hero-img-preview");
+    var removeBtn=document.getElementById("hero-img-remove");
+    if(c.heroImage){
+      preview.innerHTML='<img src="'+c.heroImage+'" style="width:100%;height:120px;object-fit:cover;border-radius:10px;border:1px solid #e8e0d0;" />';
+      removeBtn.style.display="block";
+    }else{
+      preview.innerHTML='<p style="font-size:11px;color:#aaa;">Pa gen foto hero pou kounye a.</p>';
+      removeBtn.style.display="none";
+    }
+  });
+}
+
+function listenContact(){
+  db.ref("content").on("value",function(snap){
+    var c=snap.val()||{};
+    setVal("ct-address",c.address);
+    setVal("ct-phone",c.phone);
+    setVal("ct-whatsapp",c.whatsapp);
+    setVal("ct-facebook",c.facebook);
+  });
+}
+
+function listenGallery(){
+  db.ref("gallery").on("value",function(snap){
+    var val=snap.val();
+    galleryPhotos=val?Object.keys(val).map(function(k){return {key:k,src:val[k]};}):[];
+    renderGalleryAdmin();
+  });
+}
+
+function setVal(id,val){
+  var el=document.getElementById(id);
+  if(el && val!==undefined && val!==null) el.value=val;
+}
+
+function requireDb(){
+  if(!db){showToast("Firebase pa konfigire. Tcheke firebase-config.js");return false;}
+  return true;
+}
+
+// ---------- MENU CRUD ----------
+function renderMenuAdmin(cat){
+  cat=cat||"tout";
+  var list=document.getElementById("menu-admin-list");
+  var items=menu.filter(function(i){return cat==="tout"||i.cat===cat;});
+  if(items.length===0){list.innerHTML='<p style="text-align:center;color:#aaa;font-size:13px;padding:20px 0;">Pa gen manje.</p>';return;}
+  list.innerHTML=items.map(function(item){
+    var imgHtml=item.img?'<img src="'+item.img+'" />':'<i class="ti ti-tools-kitchen-2"></i>';
+    var star=item.featured?'<i class="ti ti-star-filled" style="color:#c9a84c;font-size:12px;margin-left:4px;"></i>':'';
+    return '<div class="mi-row">'+
+      '<div class="mi-img">'+imgHtml+'</div>'+
+      '<div class="mi-body"><h4>'+escapeHtml(item.name)+star+'</h4><p>'+escapeHtml(item.desc||"")+'</p></div>'+
+      '<div class="mi-price">'+item.price+' HTG</div>'+
+      '<div class="mi-actions">'+
+        '<button class="icon-btn" onclick="editMeal(\''+item._key+'\')"><i class="ti ti-edit"></i></button>'+
+        '<button class="icon-btn danger" onclick="deleteMeal(\''+item._key+'\')"><i class="ti ti-trash"></i></button>'+
+      '</div>'+
+    '</div>';
+  }).join("");
+}
+
+function filterAdmin(cat,el){
+  document.querySelectorAll("#sec-menu .cp").forEach(function(p){p.classList.remove("active");});
+  el.classList.add("active");
+  el.dataset.cat=cat;
+  renderMenuAdmin(cat);
+}
+
+var pendingImgData="";
+document.getElementById("m-img").addEventListener("change",function(){
+  var f=this.files&&this.files[0];
+  if(!f){pendingImgData="";document.getElementById("m-img-preview").innerHTML="";return;}
+  var r=new FileReader();
+  r.onload=function(e){
+    pendingImgData=e.target.result;
+    document.getElementById("m-img-preview").innerHTML='<img src="'+pendingImgData+'" style="width:60px;height:60px;object-fit:cover;border-radius:8px;border:1px solid #e8e0d0;" />';
+  };
+  r.readAsDataURL(f);
+});
+
+function saveMeal(){
+  if(!requireDb())return;
+  var name=document.getElementById("m-name").value.trim();
+  var price=parseInt(document.getElementById("m-price").value)||0;
+  var desc=document.getElementById("m-desc").value.trim();
+  var cat=document.getElementById("m-cat").value;
+  var featured=document.getElementById("m-featured").checked;
+  var key=document.getElementById("edit-key").value;
+  if(!name||!price){showToast("Tanpri mete non manje ak pri.");return;}
+
+  var existingImg="";
+  if(key){
+    var existing=menu.find(function(m){return m._key===key;});
+    if(existing) existingImg=existing.img||"";
+  }
+  var imgData=pendingImgData||existingImg;
+  var data={name:name,price:price,desc:desc,cat:cat,img:imgData,featured:featured};
+
+  if(key){
+    db.ref("menu/"+key).set(data).then(function(){
+      showToast("Manje aktyalize!");
+      cancelEdit();
+    });
+  }else{
+    db.ref("menu").push(data).then(function(){
+      showToast(name+" ajoute nan meni!");
+      cancelEdit();
+    });
+  }
+}
+
+function editMeal(key){
+  var item=menu.find(function(m){return m._key===key;});
+  if(!item)return;
+  document.getElementById("edit-key").value=key;
+  document.getElementById("m-name").value=item.name||"";
+  document.getElementById("m-price").value=item.price||"";
+  document.getElementById("m-desc").value=item.desc||"";
+  document.getElementById("m-cat").value=item.cat||"plat";
+  document.getElementById("m-featured").checked=!!item.featured;
+  pendingImgData="";
+  document.getElementById("m-img").value="";
+  document.getElementById("m-img-preview").innerHTML=item.img?'<img src="'+item.img+'" style="width:60px;height:60px;object-fit:cover;border-radius:8px;border:1px solid #e8e0d0;" />':"";
+  document.getElementById("form-title").textContent="Modifye manje";
+  document.getElementById("m-save-btn").innerHTML='<i class="ti ti-check" style="font-size:13px;vertical-align:-2px;margin-right:4px;"></i>Sovgade chanjman';
+  document.getElementById("m-cancel-btn").style.display="block";
+  window.scrollTo(0,0);
+}
+
+function cancelEdit(){
+  document.getElementById("edit-key").value="";
+  document.getElementById("m-name").value="";
+  document.getElementById("m-price").value="";
+  document.getElementById("m-desc").value="";
+  document.getElementById("m-cat").value="plat";
+  document.getElementById("m-featured").checked=false;
+  document.getElementById("m-img").value="";
+  document.getElementById("m-img-preview").innerHTML="";
+  pendingImgData="";
+  document.getElementById("form-title").textContent="Ajoute yon manje nouvo";
+  document.getElementById("m-save-btn").innerHTML='<i class="ti ti-plus" style="font-size:13px;vertical-align:-2px;margin-right:4px;"></i>Ajoute nan meni';
+  document.getElementById("m-cancel-btn").style.display="none";
+}
+
+function deleteMeal(key){
+  if(!requireDb())return;
+  if(!confirm("Efase manje sa a nèt?"))return;
+  db.ref("menu/"+key).remove().then(function(){
+    showToast("Manje efase.");
+    if(document.getElementById("edit-key").value===key) cancelEdit();
+  });
+}
+
+// ---------- CONTENT ----------
+document.getElementById("c-heroImg").addEventListener("change",function(){
+  var f=this.files&&this.files[0];
+  if(!f){pendingHeroImg="";return;}
+  var r=new FileReader();
+  r.onload=function(e){
+    pendingHeroImg=e.target.result;
+    document.getElementById("hero-img-preview").innerHTML='<img src="'+pendingHeroImg+'" style="width:100%;height:120px;object-fit:cover;border-radius:10px;border:1px solid #e8e0d0;" />';
+    document.getElementById("hero-img-remove").style.display="block";
+  };
+  r.readAsDataURL(f);
+});
+
+function removeHeroImage(){
+  if(!requireDb())return;
+  if(!confirm("Retire foto hero a?"))return;
+  pendingHeroImg="REMOVE";
+  db.ref("content/heroImage").remove().then(function(){
+    showToast("Foto hero retire.");
+    pendingHeroImg="";
+    document.getElementById("c-heroImg").value="";
+  });
+}
+
+function saveContent(){
+  if(!requireDb())return;
+  var welcomeText=document.getElementById("c-welcomeText").value.trim().replace(/\n/g,"<br>");
+  var updates={
+    welcomeTitle:document.getElementById("c-welcomeTitle").value.trim(),
+    welcomeText:welcomeText,
+    hoursWeekday:document.getElementById("c-hoursWeekday").value.trim(),
+    hoursSat:document.getElementById("c-hoursSat").value.trim(),
+    hoursSun:document.getElementById("c-hoursSun").value.trim(),
+    aboutTitle:document.getElementById("c-aboutTitle").value.trim(),
+    aboutText:document.getElementById("c-aboutText").value.trim()
+  };
+  if(pendingHeroImg && pendingHeroImg!=="REMOVE"){
+    updates.heroImage=pendingHeroImg;
+  }
+  db.ref("content").update(updates).then(function(){
+    showToast("Tèks sovgade! Chanjman ap parèt pou tout vizitè.");
+    pendingHeroImg="";
+    document.getElementById("c-heroImg").value="";
+  });
+}
+
+// ---------- CONTACT ----------
+function saveContact(){
+  if(!requireDb())return;
+  var updates={
+    address:document.getElementById("ct-address").value.trim(),
+    phone:document.getElementById("ct-phone").value.trim(),
+    whatsapp:document.getElementById("ct-whatsapp").value.trim(),
+    facebook:document.getElementById("ct-facebook").value.trim()
+  };
+  db.ref("content").update(updates).then(function(){
+    showToast("Kontak sovgade!");
+  });
+}
+
+// ---------- GALLERY ----------
+function renderGalleryAdmin(){
+  var grid=document.getElementById("gallery-admin-grid");
+  if(galleryPhotos.length===0){grid.innerHTML='<p style="grid-column:1/-1;text-align:center;color:#aaa;font-size:13px;padding:14px 0;">Poko gen foto.</p>';return;}
+  grid.innerHTML=galleryPhotos.map(function(p){
+    return '<div class="gc"><img src="'+p.src+'" /><button class="gc-del" onclick="deletePhoto(\''+p.key+'\')">&times;</button></div>';
+  }).join("");
+}
+
+function addGalleryPhotos(input){
+  if(!requireDb())return;
+  var files=Array.from(input.files);
+  var loaded=0;
+  files.forEach(function(f){
+    var r=new FileReader();
+    r.onload=function(e){
+      db.ref("gallery").push(e.target.result).then(function(){
+        loaded++;
+        if(loaded===files.length) showToast(loaded+" foto ajoute!");
+      });
+    };
+    r.readAsDataURL(f);
+  });
+  input.value="";
+}
+
+function deletePhoto(key){
+  if(!requireDb())return;
+  db.ref("gallery/"+key).remove().then(function(){showToast("Foto efase.");});
+}
+
+// ---------- NAV / UTIL ----------
+function goSec(id,btn){
+  document.querySelectorAll(".sec").forEach(function(s){s.classList.remove("active");});
+  document.querySelectorAll(".nav .nb").forEach(function(b){b.classList.remove("active");});
+  document.getElementById("sec-"+id).classList.add("active");
+  if(btn)btn.classList.add("active");
+  window.scrollTo(0,0);
+}
+
+function escapeHtml(s){
+  var d=document.createElement("div");
+  d.textContent=s||"";
+  return d.innerHTML;
+}
+
+var toastTimer;
+function showToast(msg){
+  var t=document.getElementById("toast");
+  t.textContent=msg;
+  t.classList.add("show");
+  clearTimeout(toastTimer);
+  toastTimer=setTimeout(function(){t.classList.remove("show");},3000);
+}
+</script>
+</body>
+</html>
