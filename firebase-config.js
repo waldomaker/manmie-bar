@@ -1,15 +1,9 @@
-// Firebase configuration
-// Replace the values below with YOUR Firebase project's config.
-// Find this in: Firebase Console > Project Settings > General > Your apps > SDK setup and configuration
-//
-// This file is loaded by both index.html (visitor page) and admin.html (admin page).
-
 window.firebaseConfig = {
-  apiKey: "REPLACE_ME",
-  authDomain: "REPLACE_ME.firebaseapp.com",
-  databaseURL: "https://REPLACE_ME-default-rtdb.firebaseio.com",
-  projectId: "REPLACE_ME",
-  storageBucket: "REPLACE_ME.appspot.com",
-  messagingSenderId: "REPLACE_ME",
-  appId: "REPLACE_ME"
+  apiKey: "AIzaSyAl8IeYwp3tDp2U-EeQv0brkLzrgC43xGM",
+  authDomain: "manmie-bar.firebaseapp.com",
+  databaseURL: "https://manmie-bar-default-rtdb.firebaseio.com",
+  projectId: "manmie-bar",
+  storageBucket: "manmie-bar.firebasestorage.app",
+  messagingSenderId: "1002274107668",
+  appId: "1:1002274107668:web:656d671bf9c4bbb6079201"
 };
